@@ -4,7 +4,6 @@
 using namespace std;
 
 #define ROUND(a) ((int) (a + 0.5))
-#define MulDiv(a,b,c)    (((a)*(b))/(c))
 
 //Struct for point in 2d
 struct Point{
@@ -25,10 +24,13 @@ static COLORREF fill_color=RGB(255,255,255);//Color for the fill of shape
 static COLORREF stroke_color=RGB(255,255,255);//Color for the stroke of shape
 static bool do_fill = true;//Should shape have fill
 static bool do_stroke = true;//Should shape have stroke
+static BYTE bg_alpha = 0;
+
 static Point previous;//Previous point in polygon/vertex
 static bool first = false;//Did we statred a shape drawing
 static bool loop = true;//Should the draw function be in loop
 static long long frameCount = 0;
+
 //Set the fill color of shapes
 void fill(COLORREF color=RGB(255,255,255)){
 	fill_color = color;
@@ -228,8 +230,9 @@ void vertex(Point p){
 	previous = p;
 }
 
-void background(){
-	HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
+void background(COLORREF bg = RGB(0,0,0), BYTE alpha = 0){
+	bg_alpha = alpha;
+	HBRUSH hBrush = CreateSolidBrush(bg);
 	RECT rect;
 	GetClientRect(myconsole, &rect);
 	FillRect(bufDC,&rect,hBrush);
@@ -289,7 +292,12 @@ void noLoop(){
 }
 
 void doDraw(){
-	BitBlt(mydc,0,0,width,height,bufDC,0, 0,SRCCOPY);
+	if (bg_alpha == 0){
+		BitBlt(mydc,0,0,width,height,bufDC,0, 0,SRCCOPY);
+	}else{
+		BLENDFUNCTION blend = {AC_SRC_OVER, 0, bg_alpha, 0};
+		AlphaBlend(mydc, 0, 0, width, height, bufDC, 0, 0 , width, height, blend);
+	}
 }
 
 void setup();

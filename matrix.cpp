@@ -57,7 +57,7 @@ private:
 	int totalSymbols;
 public:
 	Stream(){
-		this->totalSymbols = Random(5,20);
+		this->totalSymbols = Random(5,35);
 		this->speed = Random(5,20);
 		symbols = new Symbol[this->totalSymbols];
 	}
@@ -67,7 +67,7 @@ public:
 	}
 	
 	void generateSymbols(int x, int y){
-		bool first = (Random(0,4) == 1);
+		bool first = (Random(0,3) == 1);
 		for(int i=0; i < totalSymbols; i++){
 			symbols[i] = Symbol(x,y,this->speed, first);
 			symbols[i].setToRandomSymbol();
@@ -103,7 +103,7 @@ void setup(){
 }
 
 void draw(){
-	background();
+	background(RGB(0,0,0),150);
 	for (int i=0;i <= width/symbolSize; i++)
 	{
 		streams[i]->render();
