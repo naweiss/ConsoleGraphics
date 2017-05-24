@@ -3,7 +3,7 @@
 #include <string>
 #include <ctime>
 
-static const int POINT_SIZE = 7;
+static const int POINT_SIZE = 8;
 static double recordDistance = -1;
 static Point cities[POINT_SIZE];
 static Point bestEver[POINT_SIZE];
@@ -95,8 +95,8 @@ void setup(){
 void draw(){
 	background();
 	
-	// int percent = (10000 * cities_count / totalPermutations);
-	// cout << percent/100.0 << "% completed";
+	int percent = (10000 * cities_count / totalPermutations);
+	cout << percent/100.0 << "% completed";
 	
 	noFill();
 	stroke();
