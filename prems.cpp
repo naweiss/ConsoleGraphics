@@ -24,11 +24,12 @@ void Reverse(int start,int end)
 }
 
 void draw(){
-	background();
+	//background();
 	
+	string str = "";
 	for (int i = 0; i < VALS_SIZE; i++)
-		cout << vals[i] << " ";
-	cout << endl;
+		str += vals[i] + " ";
+	drawText(0,0,str.c_str(),str.length());
 	
 	int largestI = -1;
 	for (int i = 0; i < VALS_SIZE-1; i++){
@@ -37,7 +38,8 @@ void draw(){
 	}
 	if(largestI == -1){
 		noLoop();
-		cout << "finished" << endl;
+		str = "finished";
+		drawText(0,0,str.c_str(),str.length());
 		return;
 	}
 	int largestJ = -1;

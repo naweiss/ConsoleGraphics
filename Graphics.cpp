@@ -15,8 +15,12 @@ struct Point{
 
 static HWND myconsole = NULL;//A console handle
 static HDC mydc = NULL;//A handle to device context
+static HDC bufDC = NULL;//A temp dc
+static HBITMAP hbmMem;//New bitmap
 static int width = -1;//Width of the canvas/screen
 static int height = -1;//Height of the canvas/screen
+
+
 static COLORREF fill_color=RGB(255,255,255);//Color for the fill of shape
 static COLORREF stroke_color=RGB(255,255,255);//Color for the stroke of shape
 static bool do_fill = true;//Should shape have fill
@@ -63,10 +67,10 @@ void drawLine(int x0, int y0, int x1, int y1){
    yIncrement = dy / (float) steps;
 
    if (do_fill){
-	   SetPixelV(mydc, ROUND(x), ROUND(y),fill_color);
+	   SetPixelV(bufDC, ROUND(x), ROUND(y),fill_color);
    }
    else{
-		SetPixelV(mydc, ROUND(x), ROUND(y),stroke_color);
+		SetPixelV(bufDC, ROUND(x), ROUND(y),stroke_color);
    }
 
    for(int k = 0; k < steps; k++){
@@ -76,10 +80,10 @@ void drawLine(int x0, int y0, int x1, int y1){
     y += yIncrement;
 
 	if (do_fill){
-		SetPixelV(mydc, x, y, fill_color);
+		SetPixelV(bufDC, x, y, fill_color);
 	}
 	else{
-		SetPixelV(mydc, x, y, stroke_color);
+		SetPixelV(bufDC, x, y, stroke_color);
 	}
 
  }
@@ -91,7 +95,7 @@ void drawRectangle(int x, int y, int w, int h){
 	if (do_fill){
 		for(int i = x; i <= x+w; i ++){
 			for(int j = y; j <= y+h; j ++){
-				SetPixelV(mydc, i, j, fill_color);
+				SetPixelV(bufDC, i, j, fill_color);
 			}
 		}
 	}
@@ -113,11 +117,11 @@ void doEllipse(int xc, int yc, int x, int y){
 	}
 	else{
 		/*This function plots a pixel at coordinates(x,y) specified by first 2 arguments and third argument specifies the color of the pixel*/
-		SetPixelV(mydc, xc+x, yc+y, stroke_color);
-		SetPixelV(mydc, xc-x, yc+y, stroke_color);
+		SetPixelV(bufDC, xc+x, yc+y, stroke_color);
+		SetPixelV(bufDC, xc-x, yc+y, stroke_color);
 		
-		SetPixelV(mydc, xc+x, yc-y, stroke_color);
-		SetPixelV(mydc, xc-x, yc-y, stroke_color);
+		SetPixelV(bufDC, xc+x, yc-y, stroke_color);
+		SetPixelV(bufDC, xc-x, yc-y, stroke_color);
 	}
 }
 
@@ -184,10 +188,17 @@ void drawCircle(int x0, int y0, int r){
 }
 
 void drawText(int x0, int y0,wchar_t* txt, int len){
-	SetTextColor(mydc,fill_color);
-	SetBkMode(mydc,TRANSPARENT);
-	TextOutW(mydc, x0, y0, TEXT(txt),len);
-	SetBkMode(mydc,OPAQUE);
+	SetTextColor(bufDC,fill_color);
+	SetBkMode(bufDC,TRANSPARENT);
+	TextOutW(bufDC, x0, y0, TEXT(txt),len);
+	SetBkMode(bufDC,OPAQUE);
+}
+
+void drawText(int x0, int y0,const char* txt, int len){
+	SetTextColor(bufDC,fill_color);
+	SetBkMode(bufDC,TRANSPARENT);
+	TextOut(bufDC, x0, y0, TEXT(txt),len);
+	SetBkMode(bufDC,OPAQUE);
 }
 
 void textSize(int size){
@@ -199,7 +210,7 @@ void textSize(int size){
 	logfont.lfHeight = -size; // in pixles
 		
 	HFONT hNewFont = CreateFontIndirect(&logfont);
-	HFONT hOldFont = (HFONT)SelectObject(mydc, hNewFont);
+	SelectObject(bufDC, hNewFont);
 }
 
 //Start shape drawing
@@ -217,6 +228,14 @@ void vertex(Point p){
 	previous = p;
 }
 
+void background(){
+	HBRUSH hBrush = CreateSolidBrush(RGB(0,0,0));
+	RECT rect;
+	GetClientRect(myconsole, &rect);
+	FillRect(bufDC,&rect,hBrush);
+	DeleteObject(hBrush);
+}
+
 void InitCanvas(){
     myconsole = GetConsoleWindow();
     if (myconsole != NULL)
@@ -225,7 +244,14 @@ void InitCanvas(){
 		if (mydc != NULL)
 		{
 			width = GetDeviceCaps(mydc,HORZRES);
-			height = GetDeviceCaps(mydc,VERTRES);	
+			height = GetDeviceCaps(mydc,VERTRES);
+			bufDC = CreateCompatibleDC(mydc);
+			hbmMem = CreateCompatibleBitmap(mydc,
+                                    width,
+                                    height);
+			SelectObject(bufDC, hbmMem);
+			
+			background();
 		}
 		else{
 			cout << "Error: device context not found" << endl;
@@ -262,9 +288,8 @@ void noLoop(){
 	loop = false;
 }
 
-void background(){
-	system("cls");
-	UpdateWindow(myconsole);
+void doDraw(){
+	BitBlt(mydc,0,0,width,height,bufDC,0, 0,SRCCOPY);
 }
 
 void setup();
@@ -275,8 +300,9 @@ int main() {
 	setup();
 	do{
 		draw();
+		doDraw();
 		frameCount++;
-		//Sleep(16);
+		Sleep(16);
 	}while(loop);
 	ReleaseDC(myconsole, mydc);
 	cin.ignore();

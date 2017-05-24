@@ -71,13 +71,6 @@ int factorial(int n){
         return 1;
 }
 
-string itos(int x,int y) // convert int to string
-{
-    stringstream s;
-    s << "(" << x << "," << y << ")";
-    return s.str();
-}
-
 void setup(){
 	srand (time(NULL));
 	for (int i = 0; i < POINT_SIZE; i++){
@@ -95,8 +88,11 @@ void setup(){
 void draw(){
 	background();
 	
+	
 	int percent = (10000 * cities_count / totalPermutations);
-	cout << percent/100.0 << "% completed";
+	string str = to_string(percent/100.0);
+	str += "% completed";
+	drawText(0,0,str.c_str(),str.length());
 	
 	noFill();
 	stroke();
@@ -135,9 +131,9 @@ void draw(){
 	
 	// fill(RGB(0,255,0));
 	// for (int i = 0; i < POINT_SIZE; i++){
-		// drawText(cities[i].x,cities[i].y+5,itos(cities[i].x,cities[i].y).c_str());
+		// str = "("+to_string(cities[i].x)+","+to_string(cities[i].y)+")";
+		// drawText(cities[i].x,cities[i].y+5,str.c_str(),str.length());
 	// }
-	// system("pause");
 	
 	nextOrder();
 }

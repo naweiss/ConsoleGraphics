@@ -1,4 +1,4 @@
-#include "Graphics2.cpp"
+#include "Graphics.cpp"
 #include <ctime>
 
 class Symbol{
