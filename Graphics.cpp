@@ -373,9 +373,12 @@ int main() {
 		draw();
 		doDraw();
 		frameCount++;
-		Sleep(16);
 	}while(loop);
 	ReleaseDC(myconsole, mydc);
+	ReleaseDC(myconsole, bufDC);
+	#ifdef DESKTOP_BG_
+	ReleaseDC(myconsole, backupDC);
+	#endif
 	cin.ignore();
 	return 0;
 }

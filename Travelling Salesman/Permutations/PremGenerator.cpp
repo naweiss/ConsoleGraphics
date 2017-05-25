@@ -1,4 +1,5 @@
 #include "Graphics.cpp"
+#include <string>
 
 static const int VALS_SIZE = 3;
 static int vals[VALS_SIZE];
@@ -24,12 +25,13 @@ void Reverse(int start,int end)
 }
 
 void draw(){
-	//background();
+	background();
 	
 	string str = "";
 	for (int i = 0; i < VALS_SIZE; i++)
-		str += vals[i] + " ";
-	drawText(0,0,str.c_str(),str.length());
+		str += to_string(vals[i]) + " ";
+	drawText(20,0,str.c_str(),str.length());
+	Sleep(500);
 	
 	int largestI = -1;
 	for (int i = 0; i < VALS_SIZE-1; i++){
@@ -37,9 +39,10 @@ void draw(){
 			largestI = i;
 	}
 	if(largestI == -1){
+		background();
 		noLoop();
 		str = "finished";
-		drawText(0,0,str.c_str(),str.length());
+		drawText(20,0,str.c_str(),str.length());
 		return;
 	}
 	int largestJ = -1;

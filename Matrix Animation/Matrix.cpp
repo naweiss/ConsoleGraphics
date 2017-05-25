@@ -109,4 +109,5 @@ void draw(){
 	{
 		streams[i]->render();
 	}
+	Sleep(20);
 }
