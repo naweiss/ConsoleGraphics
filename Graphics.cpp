@@ -1,9 +1,10 @@
 #include <windows.h>
 #include <iostream>
+//#define DESKTOP_BG_ //Console window as desktop background
+//#define OVERLAY_BG_ //Console window shold merge with existing bacground
+#define ROUND(a) ((int) (a + 0.5)) //Round function
 
 using namespace std;
-
-#define ROUND(a) ((int) (a + 0.5))
 
 //Struct for point in 2d
 struct Point{
@@ -13,23 +14,24 @@ struct Point{
 };
 
 static HWND myconsole = NULL;//A console handle
-static HDC mydc = NULL;//A handle to device context
-static HDC bufDC = NULL;//A temp dc
-static HBITMAP hbmMem;//New bitmap
+static HDC mydc = NULL;//A handle to device context (screen)
+static HDC bufDC = NULL;//The current frame
 static int width = -1;//Width of the canvas/screen
 static int height = -1;//Height of the canvas/screen
-
+#ifdef DESKTOP_BG_
+static HDC backupDC = NULL;//The original background
+#endif
 
 static COLORREF fill_color=RGB(255,255,255);//Color for the fill of shape
 static COLORREF stroke_color=RGB(255,255,255);//Color for the stroke of shape
 static bool do_fill = true;//Should shape have fill
 static bool do_stroke = true;//Should shape have stroke
-static BYTE bg_alpha = 0;
+static BYTE bg_alpha = 0;//The alpha value of the drawn background
 
 static Point previous;//Previous point in polygon/vertex
 static bool first = false;//Did we statred a shape drawing
 static bool loop = true;//Should the draw function be in loop
-static long long frameCount = 0;
+static long long frameCount = 0;//The number of frames from the bigining of the animation
 
 //Set the fill color of shapes
 void fill(COLORREF color=RGB(255,255,255)){
@@ -112,6 +114,7 @@ void drawRectangle(int x, int y, int w, int h){
 	}
 }
 
+//Draw pixels section in ellipse
 void doEllipse(int xc, int yc, int x, int y){
 	if (do_fill){
 		drawLine(xc+x, yc+y, xc-x, yc+y);
@@ -127,6 +130,7 @@ void doEllipse(int xc, int yc, int x, int y){
 	}
 }
 
+//Draw ellipse in (x,y) with constants a=rx and b=ry
 void _drawEllipse(int x0, int y0, int rx, int ry){
     int rxSq = rx * rx;
     int rySq = ry * ry;
@@ -189,6 +193,7 @@ void drawCircle(int x0, int y0, int r){
 	drawEllipse(x0,y0,r,r);
 }
 
+//Draw unicode text of length = len, in (x,y) 
 void drawText(int x0, int y0,wchar_t* txt, int len){
 	SetTextColor(bufDC,fill_color);
 	SetBkMode(bufDC,TRANSPARENT);
@@ -196,6 +201,7 @@ void drawText(int x0, int y0,wchar_t* txt, int len){
 	SetBkMode(bufDC,OPAQUE);
 }
 
+//Draw ascii text of length = len, in (x,y) 
 void drawText(int x0, int y0,const char* txt, int len){
 	SetTextColor(bufDC,fill_color);
 	SetBkMode(bufDC,TRANSPARENT);
@@ -203,6 +209,7 @@ void drawText(int x0, int y0,const char* txt, int len){
 	SetBkMode(bufDC,OPAQUE);
 }
 
+//Set the text size in pixels for text drawings 
 void textSize(int size){
 	HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 	LOGFONT logfont;
@@ -230,6 +237,7 @@ void vertex(Point p){
 	previous = p;
 }
 
+//Set the background of each frame
 void background(COLORREF bg = RGB(0,0,0), BYTE alpha = 0){
 	bg_alpha = alpha;
 	HBRUSH hBrush = CreateSolidBrush(bg);
@@ -239,8 +247,53 @@ void background(COLORREF bg = RGB(0,0,0), BYTE alpha = 0){
 	DeleteObject(hBrush);
 }
 
+#ifdef DESKTOP_BG_
+//Funtion to find child of the hwnd (find the desktop handle)
+BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam){
+	HWND p = FindWindowEx(hwnd, NULL,"SHELLDLL_DefView", NULL);
+    if (p != NULL)
+    {
+        // Gets the WorkerW Window after the current one.
+        myconsole = FindWindowEx(NULL, hwnd, "WorkerW", NULL);
+    }
+	return TRUE;
+}
+
+
+//Function to locate the handle of the desktop
+void findDesktopBackGround(){
+	HWND parentFolderView = ::FindWindowExW(0, 0, L"Progman", L"Program Manager");
+	if (parentFolderView == NULL){
+		cout << "Error: ProgMan window not found" << endl;
+		return;
+	}
+	LRESULT success = SendMessageTimeout(
+		parentFolderView,
+		0x052C,
+		0,
+		NULL,
+		SMTO_NORMAL,
+		1000,
+		NULL
+	);
+	EnumWindows(EnumWindowsProc, NULL);
+}
+#endif
+
+//Colen the HDC in dst into the HDC in src
+void Clone(HDC& src, HDC& dst){
+	dst = CreateCompatibleDC(src);
+	HBITMAP hbmMem = CreateCompatibleBitmap(src, width, height);
+	SelectObject(dst, hbmMem);
+}
+
+//Create all the handles for the animation
 void InitCanvas(){
-    myconsole = GetConsoleWindow();
+	#ifdef DESKTOP_BG_
+	findDesktopBackGround(); 
+	#else
+	myconsole = GetConsoleWindow();
+	#endif
     if (myconsole != NULL)
 	{
 		mydc = GetDC(myconsole);
@@ -248,12 +301,11 @@ void InitCanvas(){
 		{
 			width = GetDeviceCaps(mydc,HORZRES);
 			height = GetDeviceCaps(mydc,VERTRES);
-			bufDC = CreateCompatibleDC(mydc);
-			hbmMem = CreateCompatibleBitmap(mydc,
-                                    width,
-                                    height);
-			SelectObject(bufDC, hbmMem);
-			
+			#ifdef DESKTOP_BG_
+			Clone(mydc, backupDC);
+			BitBlt(backupDC, 0, 0, width, height, mydc, 0, 0, SRCCOPY);
+			#endif
+			Clone(mydc, bufDC);
 			background();
 		}
 		else{
@@ -291,6 +343,7 @@ void noLoop(){
 	loop = false;
 }
 
+//Draw the current frame of animation
 void doDraw(){
 	if (bg_alpha == 0){
 		BitBlt(mydc,0,0,width,height,bufDC,0, 0,SRCCOPY);
@@ -298,11 +351,21 @@ void doDraw(){
 		BLENDFUNCTION blend = {AC_SRC_OVER, 0, bg_alpha, 0};
 		AlphaBlend(mydc, 0, 0, width, height, bufDC, 0, 0 , width, height, blend);
 	}
+	#ifdef DESKTOP_BG_
+	#ifdef OVERLAY_BG_
+	BLENDFUNCTION blend = {AC_SRC_OVER, 0, 100, 0};
+	AlphaBlend(mydc,0,0,width,height,backupDC,0, 0,width,height, blend);
+	#endif
+	#endif
 }
 
+//Prototype for the initialization of the program
 void setup();
+
+//Prototype for each frame draw
 void draw();
 
+//Run the drawing in loop until noLoop() is called
 int main() {
 	InitCanvas();
 	setup();

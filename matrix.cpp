@@ -104,6 +104,7 @@ void setup(){
 
 void draw(){
 	background(RGB(0,0,0),150);
+	//background();
 	for (int i=0;i <= width/symbolSize; i++)
 	{
 		streams[i]->render();
