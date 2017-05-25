@@ -11,6 +11,17 @@ struct Point{
    int x;
    int y;
    COLORREF color;
+   Point(){}
+   Point(int x,int y){
+	   this->x = x;
+	   this->y = y;
+   }
+};
+
+struct Image{
+	int width;
+	int height;
+	COLORREF* pixels;
 };
 
 static HWND myconsole = NULL;//A console handle
@@ -329,12 +340,12 @@ COLORREF rainbowColors(int j){
 }
 
 //Return random number between 0 and max not including max
-int Random(int max){
+unsigned int Random(unsigned int max){
 	return rand() % max;
 }
 
 //Return random number between min and max not including max
-int Random(int min, int max){
+unsigned int Random(unsigned int min, unsigned int max){
 	return Random(max-min) + min;
 }
 
@@ -357,6 +368,30 @@ void doDraw(){
 	AlphaBlend(mydc,0,0,width,height,backupDC,0, 0,width,height, blend);
 	#endif
 	#endif
+}
+
+Image* loadImage(const char *name){
+	HBITMAP hBMP = (HBITMAP)LoadImage( NULL, name, IMAGE_BITMAP, 0, 0,
+               LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
+    if (hBMP == NULL)
+		return NULL;
+	BITMAP BMp;
+	if (0 == GetObject(hBMP, sizeof(BMp), &BMp))
+		return NULL;
+	Image* img = new Image();
+	img->width = BMp.bmWidth;
+	img->height = BMp.bmHeight;
+	img->pixels = new COLORREF[BMp.bmWidth*BMp.bmHeight];
+	unsigned char* ptr = (unsigned char*)BMp.bmBits;
+	int count=0;
+	for(int i=0; i < BMp.bmWidthBytes*BMp.bmHeight;i+=BMp.bmBitsPixel/8,count++){
+		//Mirroring on the y axis
+		int y = (BMp.bmHeight - count/BMp.bmWidth - 1);
+		int x = (count%BMp.bmWidth);
+		
+		img->pixels[x+y*BMp.bmWidth] = RGB(ptr[i+2],ptr[i+1],ptr[i]);
+	}
+	return img;
 }
 
 //Prototype for the initialization of the program
