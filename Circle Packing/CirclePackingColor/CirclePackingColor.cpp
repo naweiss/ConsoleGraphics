@@ -1,4 +1,5 @@
 #include "Graphics.cpp"
+#include "Math.cpp"
 #include <vector>
 #include <ctime>
 
@@ -85,7 +86,7 @@ void draw(){
 		c->grow();
 	}
 	
-	int total = 100;
+	int total = 40;
 	int count = 0;
 	int atempts = 0;
 	

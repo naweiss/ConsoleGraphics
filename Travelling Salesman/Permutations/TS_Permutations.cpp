@@ -1,4 +1,5 @@
 #include "Graphics.cpp"
+#include "Math.cpp"
 #include <sstream>
 #include <string>
 #include <ctime>

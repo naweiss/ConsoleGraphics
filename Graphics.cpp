@@ -248,9 +248,12 @@ void vertex(Point p){
 	previous = p;
 }
 
+void alpha(BYTE alpha = 0){
+	bg_alpha = alpha;	
+}
+
 //Set the background of each frame
-void background(COLORREF bg = RGB(0,0,0), BYTE alpha = 0){
-	bg_alpha = alpha;
+void background(COLORREF bg = RGB(0,0,0)){
 	HBRUSH hBrush = CreateSolidBrush(bg);
 	RECT rect;
 	GetClientRect(myconsole, &rect);
@@ -337,16 +340,6 @@ COLORREF rainbowColors(int j){
 	green = sin(frequency*j + 2) * 127 + 128;
 	blue  = sin(frequency*j + 4) * 127 + 128;
 	return RGB(red,green,blue);
-}
-
-//Return random number between 0 and max not including max
-unsigned int Random(unsigned int max){
-	return rand() % max;
-}
-
-//Return random number between min and max not including max
-unsigned int Random(unsigned int min, unsigned int max){
-	return Random(max-min) + min;
 }
 
 //Stop the draw loop

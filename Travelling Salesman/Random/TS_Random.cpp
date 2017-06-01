@@ -1,4 +1,5 @@
 #include "Graphics.cpp"
+#include "Math.cpp"
 #include <ctime>
 
 static const int POINT_SIZE = 10;
