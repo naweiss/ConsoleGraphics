@@ -36,20 +36,8 @@ public:
 static vector<Circle> circles;
 static Image* img = NULL;
 
-void setup(){
-	srand(time(NULL));
-	noStroke();
-	img = loadImage("kitten.bmp");
-	if (img == NULL){
-		noLoop();
-		return;
-	}
-	width = img->width;
-	height = img-> height;
-}
-
 double dist(int x0, int y0, int x1, int y1){
-	return sqrt(pow(abs(x0-x1),2)+pow(abs(y0-y1),2));
+	return sqrt(pow(x0-x1,2)+pow(y0-y1,2));
 }
 
 bool newCircle(){
@@ -63,6 +51,18 @@ bool newCircle(){
 	int index = x+y*width;
 	circles.push_back(Circle(x,y,img->pixels[index]));
 	return true;
+}
+
+void setup(){
+	srand(time(NULL));
+	noStroke();
+	img = loadImage("kitten.bmp");
+	if (img == NULL){
+		noLoop();
+		return;
+	}
+	width = img->width;
+	height = img-> height;
 }
 
 void draw(){

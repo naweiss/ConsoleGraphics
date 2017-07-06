@@ -3,11 +3,11 @@
 using namespace std;
 
 class Vector{
-private:
+public:
 	double x;
 	double y;
 	double z;
-public:
+	
 	Vector(double x = 0,double y = 0 , double z = 0){
 		this->x = x;
 		this->y = y;
@@ -30,7 +30,7 @@ public:
 		return ((x == obj.x) && (y == obj.y) && (z == obj.z));
 	}
 	
-	Vector& operator+(const Vector& obj){
+	Vector operator+(const Vector& obj){
 		Vector result;
 		result.x = this->x + obj.x;
 		result.y = this->y + obj.y;
@@ -38,14 +38,14 @@ public:
 		return result;
 	}
 	
-	Vector& operator+=(const Vector& obj){
+	Vector operator+=(const Vector& obj){
 		this->x += obj.x;
 		this->y += obj.y;
 		this->z += obj.z;
 		return *this;
 	}
 	
-	Vector& operator-(const Vector& obj){
+	Vector operator-(const Vector& obj){
 		Vector result;
 		result.x = this->x - obj.x;
 		result.y = this->y - obj.y;
@@ -54,14 +54,14 @@ public:
 	}
 	
 	
-	Vector& operator-=(const Vector& obj){
+	Vector operator-=(const Vector& obj){
 		this->x -= obj.x;
 		this->y -= obj.y;
 		this->z -= obj.z;
 		return *this;
 	}
 	
-	Vector& operator*(const double n){
+	Vector operator*(const double n){
 		Vector result;
 		result.x = this->x * n;
 		result.y = this->y * n;
@@ -70,14 +70,14 @@ public:
 	}
 	
 	
-	Vector& operator*=(const double n){
+	Vector operator*=(const double n){
 		this->x *= n;
 		this->y *= n;
 		this->z *= n;
 		return *this;
 	}
 	
-	Vector& operator/(const double n){
+	Vector operator/(const double n){
 		Vector result;
 		result.x = this->x / n;
 		result.y = this->y / n;
@@ -86,7 +86,7 @@ public:
 	}
 	
 	
-	Vector& operator/=(const double n){
+	Vector operator/=(const double n){
 		this->x /= n;
 		this->y /= n;
 		this->z /= n;
@@ -106,14 +106,14 @@ public:
 		return d.mag();
 	}
 	
-	Vector& normalize() {
+	Vector normalize() {
 		if (mag() == 0)
 			return *this;
 		*this/=mag();
 		return *this;
 	}
 	
-	Vector& limit(const double max){
+	Vector limit(const double max){
 		double mSq = this->magSq();
 		if(mSq > max*max) {
 			*this/=sqrt(mSq); //normalize it
@@ -122,21 +122,16 @@ public:
 		return *this;
 	}
 	
-	Vector& fromAngle(float angle) {
+	static Vector fromAngle(float angle) {
 		return Vector(cos(angle),sin(angle),0);
 	}
 	
-	Vector& random2D() {
-		float angle;
-		//if (this.p5._angleMode === constants.DEGREES) {
-		  // angle = RandomF(360);
-		// } else {
-		  angle = RandomF(TWO_PI);
-		// }
-		return this->fromAngle(angle);
+	static Vector random2D() {
+		float angle = RandomF(TWO_PI);
+		return fromAngle(angle);
 	}
 
-	Vector& random3D() {
+	static Vector random3D() {
 		float angle,vz;
 		angle = RandomF(0,TWO_PI);
 		vz = RandomF(-1,1);

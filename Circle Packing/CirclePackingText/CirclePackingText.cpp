@@ -37,7 +37,7 @@ static Image* img = NULL;
 
 void setup(){
 	srand(time(NULL));
-	stroke();
+	stroke(RGB(255,255,255));
 	noFill();
 	img = loadImage("2017.bmp");
 	if (img == NULL){

@@ -1,3 +1,4 @@
+#include <stdlib.h>  
 #define PI	3.14159265358979323846
 #define HALF_PI	PI/2
 #define TWO_PI	PI*2

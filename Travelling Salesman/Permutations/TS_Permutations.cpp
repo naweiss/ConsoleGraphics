@@ -25,7 +25,7 @@ void Reverse(int start,int end){
 }
 
 double dist(Point p1,Point p2){
-	return sqrt(abs(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)));
+	return sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2));
 }
 
 void UpdateCities(){
@@ -96,7 +96,7 @@ void draw(){
 	drawText(0,0,str.c_str(),str.length());
 	
 	noFill();
-	stroke();
+	stroke(RGB(255,255,255));
 	beginShape();
 	for (int i = 0; i < POINT_SIZE; i++){
 		vertex(cities[order[i]]);
@@ -133,7 +133,7 @@ void draw(){
 	// fill(RGB(0,255,0));
 	// for (int i = 0; i < POINT_SIZE; i++){
 		// str = "("+to_string(cities[i].x)+","+to_string(cities[i].y)+")";
-		// drawText(cities[i].x,cities[i].y+5,str.c_str(),str.length());
+		// drawText(cities[i].x+width/3,cities[i].y+5,str.c_str(),str.length());
 	// }
 	
 	nextOrder();

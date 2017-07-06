@@ -1,7 +1,7 @@
 #include "Graphics.cpp"
 #include <string>
 
-static const int VALS_SIZE = 3;
+static const int VALS_SIZE = 5;
 static int vals[VALS_SIZE];
 
 void setup(){

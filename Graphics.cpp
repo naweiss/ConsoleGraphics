@@ -1,10 +1,14 @@
-#include <windows.h>
 #include <iostream>
-//#define DESKTOP_BG_ //Console window as desktop background
-//#define OVERLAY_BG_ //Console window shold merge with existing bacground
+#include <Windows.h>
 #define ROUND(a) ((int) (a + 0.5)) //Round function
 
+//#define DESKTOP_BG_ //Console window as desktop background
+//#define OVERLAY_BG_ //Console window shold merge with existing bacground
+//#define OVERLAY_BG_ALPHA 50
 using namespace std;
+
+static int width = -1;//Width of the canvas/screen
+static int height = -1;//Height of the canvas/screen
 
 //Struct for point in 2d
 struct Point{
@@ -24,25 +28,24 @@ struct Image{
 	COLORREF* pixels;
 };
 
-static HWND myconsole = NULL;//A console handle
-static HDC mydc = NULL;//A handle to device context (screen)
-static HDC bufDC = NULL;//The current frame
-static int width = -1;//Width of the canvas/screen
-static int height = -1;//Height of the canvas/screen
+HWND myconsole = NULL;//A console handle
+HDC mydc = NULL;//A handle to device context (screen)
+HDC bufDC = NULL;//The current frame
+
 #ifdef DESKTOP_BG_
 static HDC backupDC = NULL;//The original background
 #endif
 
-static COLORREF fill_color=RGB(255,255,255);//Color for the fill of shape
-static COLORREF stroke_color=RGB(255,255,255);//Color for the stroke of shape
-static bool do_fill = true;//Should shape have fill
-static bool do_stroke = true;//Should shape have stroke
-static BYTE bg_alpha = 0;//The alpha value of the drawn background
+COLORREF fill_color=RGB(255,255,255);//Color for the fill of shape
+COLORREF stroke_color=RGB(0,0,0);//Color for the stroke of shape
+bool do_fill = true;//Should shape have fill
+bool do_stroke = true;//Should shape have stroke
+BYTE bg_alpha = 0;//The alpha value of the drawn background
 
-static Point previous;//Previous point in polygon/vertex
-static bool first = false;//Did we statred a shape drawing
-static bool loop = true;//Should the draw function be in loop
-static long long frameCount = 0;//The number of frames from the bigining of the animation
+Point previous;//Previous point in polygon/vertex
+bool first = false;//Did we statred a shape drawing
+bool loop = true;//Should the draw function be in loop
+long long frameCount = 1;//The number of frames from the bigining of the animation
 
 //Set the fill color of shapes
 void fill(COLORREF color=RGB(255,255,255)){
@@ -51,7 +54,7 @@ void fill(COLORREF color=RGB(255,255,255)){
 }
 
 //Set the stroke color of shapes
-void stroke(COLORREF color=RGB(255,255,255)){
+void stroke(COLORREF color=RGB(0,0,0)){
 	stroke_color = color;
 	do_stroke = true;
 }
@@ -208,7 +211,7 @@ void drawCircle(int x0, int y0, int r){
 void drawText(int x0, int y0,wchar_t* txt, int len){
 	SetTextColor(bufDC,fill_color);
 	SetBkMode(bufDC,TRANSPARENT);
-	TextOutW(bufDC, x0, y0, TEXT(txt),len);
+	TextOutW(bufDC, x0, y0, txt,len);
 	SetBkMode(bufDC,OPAQUE);
 }
 
@@ -216,7 +219,7 @@ void drawText(int x0, int y0,wchar_t* txt, int len){
 void drawText(int x0, int y0,const char* txt, int len){
 	SetTextColor(bufDC,fill_color);
 	SetBkMode(bufDC,TRANSPARENT);
-	TextOut(bufDC, x0, y0, TEXT(txt),len);
+	TextOutA(bufDC, x0, y0, txt,len);
 	SetBkMode(bufDC,OPAQUE);
 }
 
@@ -357,14 +360,20 @@ void doDraw(){
 	}
 	#ifdef DESKTOP_BG_
 	#ifdef OVERLAY_BG_
-	BLENDFUNCTION blend = {AC_SRC_OVER, 0, 100, 0};
+	#ifdef OVERLAY_BG_ALPHA
+	BLENDFUNCTION blend = {AC_SRC_OVER, 0, OVERLAY_BG_ALPHA, 0};
 	AlphaBlend(mydc,0,0,width,height,backupDC,0, 0,width,height, blend);
+	#endif
+	#ifndef OVERLAY_BG_ALPHA
+	BLENDFUNCTION blend = {AC_SRC_OVER, 0, 100, 0};
+	AlphaBlend(mydc,0,0,width,height,backupDC,0, 0,width,height,
+	#endif
 	#endif
 	#endif
 }
 
 Image* loadImage(const char *name){
-	HBITMAP hBMP = (HBITMAP)LoadImage( NULL, name, IMAGE_BITMAP, 0, 0,
+	HBITMAP hBMP = (HBITMAP)LoadImageA( NULL, name, IMAGE_BITMAP, 0, 0,
                LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
     if (hBMP == NULL)
 		return NULL;
@@ -387,6 +396,23 @@ Image* loadImage(const char *name){
 	return img;
 }
 
+void nextFrame(){
+	frameCount++;
+}
+
+bool getLoop(){
+	return loop;
+}
+
+void Finish(){
+	ReleaseDC(myconsole, mydc);
+	ReleaseDC(myconsole, bufDC);
+	#ifdef DESKTOP_BG_
+	ReleaseDC(myconsole, backupDC);
+	#endif
+	cin.ignore();
+}
+
 //Prototype for the initialization of the program
 void setup();
 
@@ -400,13 +426,8 @@ int main() {
 	do{
 		draw();
 		doDraw();
-		frameCount++;
-	}while(loop);
-	ReleaseDC(myconsole, mydc);
-	ReleaseDC(myconsole, bufDC);
-	#ifdef DESKTOP_BG_
-	ReleaseDC(myconsole, backupDC);
-	#endif
-	cin.ignore();
+		nextFrame();
+	}while(getLoop());
+	Finish();
 	return 0;
 }

@@ -14,7 +14,7 @@ void swap(Point& p1,Point& p2){
 }
 
 double dist(Point p1,Point p2){
-	return sqrt(abs((p1.x-p2.x)+(p1.y-p2.y)));
+	return sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2));
 }
 
 void UpdateCities()
@@ -48,19 +48,12 @@ void draw(){
 	background();
 	
 	noFill();
-	stroke();
+	stroke(RGB(255,255,255));
 	beginShape();
 	for (int i = 0; i < POINT_SIZE; i++){
 		vertex(cities[i]);
 	}
-		
-	noStroke();
-	for (int i = 0; i < POINT_SIZE; i++){
-		fill(cities[i].color);
-		drawEllipse(cities[i].x,cities[i].y,4,4);
-	}
 	
-	noFill();
 	stroke(RGB(150,0,150));
 	beginShape();
 	for (int i = 0; i < POINT_SIZE; i++){
@@ -70,11 +63,12 @@ void draw(){
 	}
 	
 	noStroke();
-	fill();
 	for (int i = 0; i < POINT_SIZE; i++){
+		fill(cities[i].color);
+		drawEllipse(cities[i].x,cities[i].y,4,4);
+		fill();
 		drawEllipse(cities[i].x+width/3,cities[i].y,4,4);
 	}
-	
 	
 	int i =  Random(POINT_SIZE);
 	int j =  Random(POINT_SIZE);
