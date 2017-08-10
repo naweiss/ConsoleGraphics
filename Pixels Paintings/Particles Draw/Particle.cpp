@@ -23,7 +23,7 @@ public:
 	}
 	
 	void display() {
-		COLORREF c = frog->pixels[((int)x)+((int)y)*width];
+		COLORREF c = frog->get((int)x,(int)y);
 		fill(c);
 		drawEllipse(x, y, 3, 3);
 	}

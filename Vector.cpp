@@ -1,5 +1,6 @@
 #include <ostream>
 #include "Math.cpp"
+
 using namespace std;
 
 class Vector{

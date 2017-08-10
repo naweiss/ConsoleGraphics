@@ -49,10 +49,10 @@ void setup(){
 	int count = 0;
 	for (int x=0;x<img->width;x+=2){
 		for (int y=0;y<img->height;y+=2){
-			int index = x+y*img->width;
-			if (GetRValue(img->pixels[index]) > 0
-				|| GetGValue(img->pixels[index]) > 0
-				|| GetBValue(img->pixels[index]) > 0){
+			COLORREF pixel = img->get(x,y);
+			if (GetRValue(pixel) > 0
+				|| GetGValue(pixel) > 0
+				|| GetBValue(pixel) > 0){
 				spots.push_back(Point(x,y));
 			}
 		}		

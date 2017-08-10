@@ -2,6 +2,8 @@
 #include "Math.cpp"
 #include <ctime>
 
+static int num = 0;
+
 class Symbol{
 private:
 	int x;
@@ -49,7 +51,7 @@ public:
 	}
 };
 
-static int symbolSize = 14;
+static int symbolSize = 18;
 
 class Stream{
 private:
@@ -80,9 +82,9 @@ public:
 	void render(){
 		for(int i=0; i < totalSymbols; i++){
 			if (symbols[i].first)
-				fill(RGB(180,255,180));
+				fill(RGB(255,255,255));
 			else
-				fill(RGB(0,255,70));
+				fill(rainbowColors(num++/73));
 			symbols[i].render();
 		}
 	}
@@ -104,10 +106,11 @@ void setup(){
 }
 
 void draw(){
-	background();
+	background(RGB(0,0,0));
 	alpha(150);
 	for (int i=0;i <= width/symbolSize; i++)
 	{
 		streams[i]->render();
 	}
+	Sleep(20);
 }

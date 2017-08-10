@@ -25,7 +25,21 @@ struct Point{
 struct Image{
 	int width;
 	int height;
-	COLORREF* pixels;
+	BYTE* pixels;
+	
+	Image(int width, int height) {
+		this->width = width;
+		this->height = height;
+	}
+	
+	COLORREF get(int x,int y){
+		int index = (x+y*width)*3;
+		return RGB(pixels[index+2],pixels[index+1],pixels[index]);
+	}
+	
+	~Image() {
+         delete pixels;
+    }
 };
 
 HWND myconsole = NULL;//A console handle
@@ -46,6 +60,15 @@ Point previous;//Previous point in polygon/vertex
 bool first = false;//Did we statred a shape drawing
 bool loop = true;//Should the draw function be in loop
 long long frameCount = 1;//The number of frames from the bigining of the animation
+
+//get pixel color from canvas/screen
+COLORREF GetPixelC(int x,int y){
+	return GetPixel(bufDC,x,y);
+}
+
+void SetPixelC(float x,float y){
+	SetPixelV(bufDC, ROUND(x), ROUND(y), fill_color);
+}
 
 //Set the fill color of shapes
 void fill(COLORREF color=RGB(255,255,255)){
@@ -373,26 +396,32 @@ void doDraw(){
 }
 
 Image* loadImage(const char *name){
-	HBITMAP hBMP = (HBITMAP)LoadImageA( NULL, name, IMAGE_BITMAP, 0, 0,
+	HBITMAP hBMP = (HBITMAP)LoadImageA( NULL, name , IMAGE_BITMAP, 0, 0,
                LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
-    if (hBMP == NULL)
+	if (hBMP == NULL)
 		return NULL;
 	BITMAP BMp;
-	if (0 == GetObject(hBMP, sizeof(BMp), &BMp))
+	if (0 == GetObject(hBMP, sizeof(BITMAP), &BMp))
 		return NULL;
-	Image* img = new Image();
-	img->width = BMp.bmWidth;
-	img->height = BMp.bmHeight;
-	img->pixels = new COLORREF[BMp.bmWidth*BMp.bmHeight];
-	unsigned char* ptr = (unsigned char*)BMp.bmBits;
-	int count=0;
-	for(int i=0; i < BMp.bmWidthBytes*BMp.bmHeight;i+=BMp.bmBitsPixel/8,count++){
-		//Mirroring on the y axis
-		int y = (BMp.bmHeight - count/BMp.bmWidth - 1);
-		int x = (count%BMp.bmWidth);
-		
-		img->pixels[x+y*BMp.bmWidth] = RGB(ptr[i+2],ptr[i+1],ptr[i]);
-	}
+    int sizeOrig = BMp.bmWidthBytes * BMp.bmHeight;
+	Image* img = new Image(BMp.bmWidth, BMp.bmHeight);
+	img->pixels = new BYTE[sizeOrig];
+    GetBitmapBits(hBMP, sizeOrig, img->pixels);
+	return img;
+}
+
+Image* GetCanvas(){
+	HDC hCompDC = CreateCompatibleDC(bufDC);
+	HBITMAP hBmp = CreateCompatibleBitmap(bufDC, width, height);
+	(HBITMAP)SelectObject(hCompDC, hBmp);
+	BitBlt(hCompDC, 0, 0, width, height, bufDC, 0, 0, SRCCOPY);
+	BITMAP BMp;
+	if (0 == GetObject(hBmp, sizeof(BITMAP), &BMp))
+		return NULL;
+    int sizeOrig = BMp.bmWidthBytes * BMp.bmHeight;
+	Image* img = new Image(BMp.bmWidth, BMp.bmHeight);
+	img->pixels = new BYTE[sizeOrig];
+    GetBitmapBits(hBmp, sizeOrig, img->pixels);
 	return img;
 }
 

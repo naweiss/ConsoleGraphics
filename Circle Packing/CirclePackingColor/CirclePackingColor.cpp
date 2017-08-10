@@ -48,8 +48,7 @@ bool newCircle(){
 		if (dist(c->x,c->y,x,y) <= c->r)
 			return false;
 	}
-	int index = x+y*width;
-	circles.push_back(Circle(x,y,img->pixels[index]));
+	circles.push_back(Circle(x,y,img->get(x,y)));
 	return true;
 }
 

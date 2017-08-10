@@ -1,0 +1,10 @@
+Popolation:
+	* evaluation()
+	* selection()
+	
+	Object:
+		* fitness()
+		
+		DNA:
+			* crossover()
+			* mutation()

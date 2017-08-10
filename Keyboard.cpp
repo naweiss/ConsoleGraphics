@@ -6,7 +6,7 @@ bool isKeyDown(int key)
     return (GetAsyncKeyState(key) & (1 << 16));
 }
 
-int KeyDown(){
+int keysDown(){
 	//Get the current state of each key as the application starts to ensure that keys held down beforehand are not processed as pressed keys.
 	for (unsigned int keyNum = 0U; keyNum < NumberOfKeys; ++keyNum)
 	{
