@@ -66,7 +66,7 @@ public:
 	}
 	
 	void show(){
-		Vector end = pos+(vel/vel.mag())*15;
+		Vector end = pos-(vel/vel.mag())*15;
 		drawLine(pos.x,pos.y,end.x,end.y);
 	}
 };

@@ -1,14 +1,15 @@
 #include "Triangle.cpp"
 #include <vector>
 
-const int AMOUNT = 15;
+const int AMOUNT = 30;
+const float MUTATION_RATE = 0.02;
 Image* img;
 
 double color_dist(COLORREF color1,COLORREF color2){
-	double r = GetRValue(color1)-GetRValue(color2);
-	double g = GetGValue(color1)-GetGValue(color2);
-	double b = GetBValue(color1)-GetBValue(color2);
-	return pow((r/255 + g/255 + b/255)/3,2);
+	double r = abs(GetRValue(color1)-GetRValue(color2));
+	double g = abs(GetGValue(color1)-GetGValue(color2));
+	double b = abs(GetBValue(color1)-GetBValue(color2));
+	return (r + g + b)/3/255;
 }
 
 class Pic{
@@ -29,7 +30,7 @@ public:
 	
 	Pic crossover(Pic partner){
 		vector<Triangle> newgenes;
-		int mid = Random(AMOUNT);
+		int mid = AMOUNT/2;
 		for (int i=0;i<AMOUNT;i++){
 			if (i > mid){
 				newgenes.push_back(genes[i]);
@@ -42,7 +43,7 @@ public:
 	
 	void mutation(){
 		for (int i=0;i<AMOUNT;i++){
-			if (RandomF(1) < 0.01){
+			if (RandomF(1) < MUTATION_RATE){
 				genes[i] = Triangle();
 			}
 		}
@@ -55,7 +56,8 @@ public:
 				sum += color_dist(img->get(i,j),GetPixelC(i,j));
 			}
 		}
-		fitness = 1/sum;
+		sum /= img->width*img->height;
+		fitness = 1-sum;
 	}
 	
 	void show(){

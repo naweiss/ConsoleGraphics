@@ -1,5 +1,8 @@
 #include "Rocket.cpp"
 #include <vector>
+#include <fstream>
+
+ofstream myfile;
 
 class Population{
 	const int POP_SIZE = 25;
@@ -14,11 +17,14 @@ public:
 	
 	void evaluate(){
 		double maxfit = 0;
+		double sum = 0;
 		for(int i=0;i<POP_SIZE;i++){
 			rockets[i].calaFitness();
+			sum += rockets[i].fitness;
 			if (rockets[i].fitness > maxfit)
 				maxfit = rockets[i].fitness;
 		}
+		myfile << "fitness: " << sum/POP_SIZE << endl;
 		for(int i=0;i<POP_SIZE;i++){
 			rockets[i].fitness /= maxfit;
 		}

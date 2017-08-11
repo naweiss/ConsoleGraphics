@@ -12,11 +12,11 @@ public:
 	Triangle(){
 		r = b = width;
 		l = t = 0;
-		Vector center = Vector(width/2,height/2);
-		p1 = Vector::random2D()*RandomF(width/2)+center;
+		p1 = Vector::random2D()*RandomF(width/2)+Vector(width/2,width/2);
 		p2 = Vector::random2D()*RandomF(width)+p1;
 		p3 = Vector::random2D()*RandomF(width)+p1;
-		color = RGB(Random(256),Random(256),Random(256));
+		int num = 255;
+		color = RGB(num,num,num);
 		calcBorders(p1);
 		calcBorders(p2);
 		calcBorders(p3);

@@ -3,7 +3,7 @@
 #include <string>
 #include <fstream>
 
-const int POP_SIZE = 40;
+const int POP_SIZE = 30;
 ofstream myfile;
 
 class Population{
@@ -17,14 +17,19 @@ public:
 		}
 	}
 	
+	void evaluate(short index){
+		pics[index].calaFitness();
+	}
+	
 	void evaluate(){
 		double maxfit = 0;
+		double sum = 0;
 		for(int i=0;i<POP_SIZE;i++){
-			pics[i].calaFitness();
+			sum += pics[i].fitness;
 			if (pics[i].fitness > maxfit)
 				maxfit = pics[i].fitness;
 		}
-		myfile << "fitness: " << maxfit << endl;
+		myfile << "fitness: " << sum/POP_SIZE << endl;
 		for(int i=0;i<POP_SIZE;i++){
 			pics[i].fitness /= maxfit;
 		}

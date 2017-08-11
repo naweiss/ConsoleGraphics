@@ -2,9 +2,9 @@
 #include <Windows.h>
 #define ROUND(a) ((int) (a + 0.5)) //Round function
 
-//#define DESKTOP_BG_ //Console window as desktop background
-//#define OVERLAY_BG_ //Console window shold merge with existing bacground
-//#define OVERLAY_BG_ALPHA 50
+#define DESKTOP_BG_ //Console window as desktop background
+#define OVERLAY_BG_ //Console window shold merge with existing bacground
+#define OVERLAY_BG_ALPHA 50
 using namespace std;
 
 static int width = -1;//Width of the canvas/screen
@@ -296,6 +296,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam){
         // Gets the WorkerW Window after the current one.
         myconsole = FindWindowEx(NULL, hwnd, "WorkerW", NULL);
     }
+	DeleteObject(p);/**************/
 	return TRUE;
 }
 
@@ -316,6 +317,7 @@ void findDesktopBackGround(){
 		1000,
 		NULL
 	);
+	DeleteObject(parentFolderView);/**************/
 	EnumWindows(EnumWindowsProc, NULL);
 }
 #endif
@@ -325,6 +327,7 @@ void Clone(HDC& src, HDC& dst){
 	dst = CreateCompatibleDC(src);
 	HBITMAP hbmMem = CreateCompatibleBitmap(src, width, height);
 	SelectObject(dst, hbmMem);
+	DeleteObject(hbmMem);
 }
 
 //Create all the handles for the animation
@@ -398,11 +401,15 @@ void doDraw(){
 Image* loadImage(const char *name){
 	HBITMAP hBMP = (HBITMAP)LoadImageA( NULL, name , IMAGE_BITMAP, 0, 0,
                LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
-	if (hBMP == NULL)
+	if (hBMP == NULL){
+		DeleteObject(hBMP);
 		return NULL;
+	}
 	BITMAP BMp;
-	if (0 == GetObject(hBMP, sizeof(BITMAP), &BMp))
+	if (0 == GetObject(hBMP, sizeof(BITMAP), &BMp)){
+		DeleteObject(hBMP);
 		return NULL;
+	}
     int sizeOrig = BMp.bmWidthBytes * BMp.bmHeight;
 	Image* img = new Image(BMp.bmWidth, BMp.bmHeight);
 	img->pixels = new BYTE[sizeOrig];
@@ -413,15 +420,28 @@ Image* loadImage(const char *name){
 Image* GetCanvas(){
 	HDC hCompDC = CreateCompatibleDC(bufDC);
 	HBITMAP hBmp = CreateCompatibleBitmap(bufDC, width, height);
-	(HBITMAP)SelectObject(hCompDC, hBmp);
-	BitBlt(hCompDC, 0, 0, width, height, bufDC, 0, 0, SRCCOPY);
-	BITMAP BMp;
-	if (0 == GetObject(hBmp, sizeof(BITMAP), &BMp))
+	if (NULL == SelectObject(hCompDC, hBmp)){
+		DeleteDC(hCompDC);
+		DeleteObject(hBmp);
 		return NULL;
+	}
+	if (NULL == BitBlt(hCompDC, 0, 0, width, height, bufDC, 0, 0, SRCCOPY)){
+		DeleteDC(hCompDC);
+		DeleteObject(hBmp);
+		return NULL;
+	}
+	BITMAP BMp;
+	if (NULL == GetObject(hBmp, sizeof(BITMAP), &BMp)){
+		DeleteDC(hCompDC);
+		DeleteObject(hBmp);
+		return NULL;
+	}
     int sizeOrig = BMp.bmWidthBytes * BMp.bmHeight;
 	Image* img = new Image(BMp.bmWidth, BMp.bmHeight);
 	img->pixels = new BYTE[sizeOrig];
     GetBitmapBits(hBmp, sizeOrig, img->pixels);
+	DeleteDC(hCompDC);
+	DeleteObject(hBmp);
 	return img;
 }
 

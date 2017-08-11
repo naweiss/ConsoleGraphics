@@ -11,6 +11,7 @@ void setup(){
 	width /=2;
 	height /= 2;
 	sleep_time = 0;
+	myfile.open ("log.txt");
 	pop = new Population();
 	target = Vector(width/2, 50);
 	fill();
