@@ -1,8 +1,8 @@
 #include "Triangle.cpp"
 #include <vector>
 
-const int AMOUNT = 30;
-const float MUTATION_RATE = 0.02;
+const int AMOUNT = 10;
+const float MUTATION_RATE = 0.01;
 Image* img;
 
 double color_dist(COLORREF color1,COLORREF color2){

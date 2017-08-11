@@ -3,14 +3,13 @@
 #include <ctime>
 
 Population* pop;
-int sleep_time;
 
 void setup(){
 	srand(time(NULL));
 	myfile.open ("log.txt");
-	width = height = 350;
-	sleep_time = 0;
-	img = loadImage("halfs.bmp");
+	img = loadImage("halfs_2.bmp");
+	width = img->width;
+	height = img->height;
 	pop = new Population();
 }
 
@@ -28,8 +27,11 @@ void draw(){
 		pop->evaluate();
 		pop->selection();
 	}
-	
 	fill(RGB(255,0,0));
-	string passed = "index: "+to_string(index);
+	string passed = "gen: "+to_string(pop->generation);
 	drawText(width - 60,0,passed.c_str(),passed.length());
+	passed = "index: "+to_string(index);
+	drawText(width - 70,20,passed.c_str(),passed.length());
+	passed = "best: "+to_string(bestFitness);
+	drawText(width - 100,40,passed.c_str(),passed.length());
 }

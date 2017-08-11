@@ -3,15 +3,18 @@
 #include <string>
 #include <fstream>
 
-const int POP_SIZE = 30;
+const int POP_SIZE = 300;
 ofstream myfile;
+double bestFitness = 0;
 
 class Population{
 public:
 	vector<Pic> pics;
 	vector<Pic> matingpool;
+	int generation;
 	
 	Population(){
+		generation = 0;
 		for(int i=0;i<POP_SIZE;i++){
 			pics.push_back(Pic());
 		}
@@ -26,10 +29,15 @@ public:
 		double sum = 0;
 		for(int i=0;i<POP_SIZE;i++){
 			sum += pics[i].fitness;
-			if (pics[i].fitness > maxfit)
+			if (pics[i].fitness > maxfit){
 				maxfit = pics[i].fitness;
+				if (pics[i].fitness > bestFitness){
+					bestFitness = pics[i].fitness;
+				}
+			}
 		}
-		myfile << "fitness: " << sum/POP_SIZE << endl;
+		myfile << "avg: " << sum/POP_SIZE << endl;
+		myfile << "best: " << maxfit << endl;
 		for(int i=0;i<POP_SIZE;i++){
 			pics[i].fitness /= maxfit;
 		}
@@ -51,6 +59,7 @@ public:
 			newpics.push_back(child);
 		}
 		pics = newpics;
+		generation++;
 	}
 	
 	void run(short index){

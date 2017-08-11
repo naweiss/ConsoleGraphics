@@ -2,9 +2,9 @@
 #include <Windows.h>
 #define ROUND(a) ((int) (a + 0.5)) //Round function
 
-#define DESKTOP_BG_ //Console window as desktop background
-#define OVERLAY_BG_ //Console window shold merge with existing bacground
-#define OVERLAY_BG_ALPHA 50
+//#define DESKTOP_BG_ //Console window as desktop background
+//#define OVERLAY_BG_ //Console window shold merge with existing bacground
+//#define OVERLAY_BG_ALPHA 50
 using namespace std;
 
 static int width = -1;//Width of the canvas/screen
@@ -25,6 +25,7 @@ struct Point{
 struct Image{
 	int width;
 	int height;
+	int Bpp;
 	BYTE* pixels;
 	
 	Image(int width, int height) {
@@ -33,7 +34,7 @@ struct Image{
 	}
 	
 	COLORREF get(int x,int y){
-		int index = (x+y*width)*3;
+		int index = (x+y*width)*Bpp;
 		return RGB(pixels[index+2],pixels[index+1],pixels[index]);
 	}
 	
@@ -281,8 +282,7 @@ void alpha(BYTE alpha = 0){
 //Set the background of each frame
 void background(COLORREF bg = RGB(0,0,0)){
 	HBRUSH hBrush = CreateSolidBrush(bg);
-	RECT rect;
-	GetClientRect(myconsole, &rect);
+	RECT rect = {0,0,width,height};
 	FillRect(bufDC,&rect,hBrush);
 	DeleteObject(hBrush);
 }
@@ -413,6 +413,7 @@ Image* loadImage(const char *name){
     int sizeOrig = BMp.bmWidthBytes * BMp.bmHeight;
 	Image* img = new Image(BMp.bmWidth, BMp.bmHeight);
 	img->pixels = new BYTE[sizeOrig];
+	img->Bpp = BMp.bmWidthBytes/BMp.bmWidth;
     GetBitmapBits(hBMP, sizeOrig, img->pixels);
 	return img;
 }
@@ -439,10 +440,55 @@ Image* GetCanvas(){
     int sizeOrig = BMp.bmWidthBytes * BMp.bmHeight;
 	Image* img = new Image(BMp.bmWidth, BMp.bmHeight);
 	img->pixels = new BYTE[sizeOrig];
+	img->Bpp = BMp.bmWidthBytes/BMp.bmWidth;
     GetBitmapBits(hBmp, sizeOrig, img->pixels);
 	DeleteDC(hCompDC);
 	DeleteObject(hBmp);
 	return img;
+}
+
+bool SaveBMP(Image* img, LPCTSTR bmpfile){
+	long BufferSize = (img->width*img->height)*img->Bpp;
+	BITMAPFILEHEADER bmfh;
+	BITMAPINFOHEADER info;
+	memset(&bmfh, 0, sizeof(BITMAPFILEHEADER));
+	memset(&info, 0, sizeof(BITMAPINFOHEADER));
+	bmfh.bfType = 0x4d42;// 0x4d42 = 'BM'
+	bmfh.bfReserved1 = 0;
+	bmfh.bfReserved2 = 0;
+	bmfh.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + BufferSize;
+	bmfh.bfOffBits = 0x36;
+	info.biSize = sizeof(BITMAPINFOHEADER);
+	info.biWidth = img->width;
+	info.biHeight = img->height;
+	info.biPlanes = 1;	
+	info.biBitCount = 8*(img->Bpp);
+	info.biCompression = BI_RGB;	
+	info.biSizeImage = 0;
+	info.biXPelsPerMeter = 0x0ec4;  
+	info.biYPelsPerMeter = 0x0ec4;     
+	info.biClrUsed = 0;	
+	info.biClrImportant = 0; 
+	HANDLE file = CreateFile (bmpfile , GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
+	if(NULL == file){
+		CloseHandle(file);
+		return false;
+	}
+	unsigned long bwritten;
+	if(WriteFile(file, &bmfh, sizeof(BITMAPFILEHEADER), &bwritten, NULL) == false){	
+		CloseHandle(file);
+		return false;
+	}
+	if(WriteFile(file, &info, sizeof ( BITMAPINFOHEADER ), &bwritten, NULL) == false){	
+		CloseHandle(file);
+		return false;
+	}
+	if (WriteFile(file, img->pixels, BufferSize, &bwritten, NULL ) == false){	
+		CloseHandle(file);
+		return false;
+	}
+	CloseHandle(file);
+	return true;
 }
 
 void nextFrame(){

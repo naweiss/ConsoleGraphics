@@ -15,8 +15,7 @@ public:
 		p1 = Vector::random2D()*RandomF(width/2)+Vector(width/2,width/2);
 		p2 = Vector::random2D()*RandomF(width)+p1;
 		p3 = Vector::random2D()*RandomF(width)+p1;
-		int num = 255;
-		color = RGB(num,num,num);
+		color = RGB(Random(256),Random(256),Random(256));
 		calcBorders(p1);
 		calcBorders(p2);
 		calcBorders(p3);
