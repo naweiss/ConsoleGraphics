@@ -15,24 +15,6 @@ public:
 		genes = newgenes;
 	}
 	
-	DNA(const DNA &obj) {
-		genes = new Triangle[AMOUNT];
-		for (int i=0;i<AMOUNT;i++){
-			genes[i] = obj.genes[i];
-		}
-	}
-	
-	const DNA &operator=(const DNA &other)
-	{
-		if(this == &other) return *this; // handling of self assignment, thanks for your advice, arul.
-		delete[] genes; // freeing previously used memory
-		genes = new Triangle[AMOUNT];
-		for (int i=0;i<AMOUNT;i++){
-			genes[i] = obj.genes[i];
-		}
-		return *this;
-	}
-	
 	~DNA(){
 		delete[] genes;
 	}

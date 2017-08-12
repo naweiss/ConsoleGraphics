@@ -25,20 +25,6 @@ public:
 		dna = new_dna;
 	}
 	
-	Pic(const Pic &obj) {
-		dna = new DNA(*(obj.dna));
-		fitness = obj.fitness;
-	}
-	
-	const Pic &operator=(const Pic &other)
-	{
-		if(this == &other) return *this; // handling of self assignment, thanks for your advice, arul.
-		delete dna; // freeing previously used memory
-		dna = new DNA(*(other.dna));
-		fitness = other.fitness;
-		return *this;
-	}
-	
 	~Pic(){
 		delete dna;
 	}
