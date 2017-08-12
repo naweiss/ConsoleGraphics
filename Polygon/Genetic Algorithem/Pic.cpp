@@ -1,8 +1,8 @@
 #include "Triangle.cpp"
 #include <vector>
 
-const int AMOUNT = 10;
-const float MUTATION_RATE = 0.01;
+const int AMOUNT = 15;
+const float MUTATION_RATE = 0.02;
 Image* img;
 
 double color_dist(COLORREF color1,COLORREF color2){
@@ -50,12 +50,14 @@ public:
 	}
 	
 	void calaFitness(){
+		Image* canvas = GetCanvas();
 		double sum = 0;
 		for (int i=0;i<img->width;i++){
 			for (int j=0;j<img->height;j++){
-				sum += color_dist(img->get(i,j),GetPixelC(i,j));
+				sum += color_dist(img->get(i,j),canvas->get(i,j));
 			}
 		}
+		delete canvas;
 		sum /= img->width*img->height;
 		fitness = 1-sum;
 	}

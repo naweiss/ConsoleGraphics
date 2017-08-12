@@ -18,18 +18,20 @@ void setup(){
 }
 
 void draw(){
-	int key = keysDown();
-	switch(key){
-		case 80:
-			while(keysDown()!=80);
-			break;
-		case 188:
-			sleep_time++;
-			break;
-		case 190:
-			if (sleep_time > 0)
-				sleep_time--;
-			break;
+	if (GetForegroundWindow() == myconsole){
+		int key = keysDown();
+		switch(key){
+			case 80:
+				while(keysDown()!=80);
+				break;
+			case 188:
+				sleep_time++;
+				break;
+			case 190:
+				if (sleep_time > 0)
+					sleep_time--;
+				break;
+		}
 	}
 	background();
 	pop->run();

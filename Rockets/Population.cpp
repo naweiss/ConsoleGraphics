@@ -5,7 +5,7 @@
 ofstream myfile;
 
 class Population{
-	const int POP_SIZE = 25;
+	const int POP_SIZE = 100;
 public:
 	vector<Rocket> rockets;
 	vector<Rocket> matingpool;

@@ -2,8 +2,9 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <iomanip>
 
-const int POP_SIZE = 300;
+const int POP_SIZE = 100;
 ofstream myfile;
 double bestFitness = 0;
 
@@ -36,8 +37,7 @@ public:
 				}
 			}
 		}
-		myfile << "avg: " << sum/POP_SIZE << endl;
-		myfile << "best: " << maxfit << endl;
+		myfile << fixed << setprecision(4) << sum/POP_SIZE << "\t" << maxfit << endl;
 		for(int i=0;i<POP_SIZE;i++){
 			pics[i].fitness /= maxfit;
 		}

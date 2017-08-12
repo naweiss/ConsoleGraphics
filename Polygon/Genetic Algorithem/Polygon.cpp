@@ -7,18 +7,20 @@ Population* pop;
 void setup(){
 	srand(time(NULL));
 	myfile.open ("log.txt");
-	img = loadImage("halfs_2.bmp");
+	img = loadImage("halfs.bmp");
 	width = img->width;
 	height = img->height;
 	pop = new Population();
 }
 
 void draw(){
-	int key = keysDown();
-	switch(key){
-		case 80:
-			while(keysDown()!=80);
-			break;
+	if (GetForegroundWindow() == myconsole){
+		int key = keysDown();
+		switch(key){
+			case 80:
+				while(keysDown()!=80);
+				break;
+		}
 	}
 	short index = (frameCount-1)%POP_SIZE;
 	pop->run(index);
