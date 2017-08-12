@@ -14,6 +14,7 @@ void setup(){
 }
 
 void draw(){
+	background();
 	if (GetForegroundWindow() == myconsole){
 		int key = keysDown();
 		switch(key){

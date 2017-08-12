@@ -4,21 +4,23 @@
 #include <fstream>
 #include <iomanip>
 
-const int POP_SIZE = 100;
+const int POP_SIZE = 10;
 ofstream myfile;
 double bestFitness = 0;
 
 class Population{
 public:
-	vector<Pic> pics;
+	Pic* pics;
 	vector<Pic> matingpool;
 	int generation;
 	
 	Population(){
 		generation = 0;
-		for(int i=0;i<POP_SIZE;i++){
-			pics.push_back(Pic());
-		}
+		pics = new Pic[POP_SIZE];
+	}
+	
+	~Population(){
+		delete[] pics;
 	}
 	
 	void evaluate(short index){
@@ -29,11 +31,12 @@ public:
 		double maxfit = 0;
 		double sum = 0;
 		for(int i=0;i<POP_SIZE;i++){
-			sum += pics[i].fitness;
-			if (pics[i].fitness > maxfit){
-				maxfit = pics[i].fitness;
-				if (pics[i].fitness > bestFitness){
-					bestFitness = pics[i].fitness;
+			double current = pics[i].fitness;
+			sum += current;
+			if (current > maxfit){
+				maxfit = current;
+				if (current > bestFitness){
+					bestFitness = current;
 				}
 			}
 		}
@@ -50,14 +53,15 @@ public:
 	}
 	
 	void selection(){
-		vector<Pic> newpics;
+		Pic* newpics = new Pic[POP_SIZE];
 		for(int i=0;i<POP_SIZE;i++){
-			Pic parentA = matingpool[Random(matingpool.size())];
-			Pic parentB = matingpool[Random(matingpool.size())];
-			Pic child = parentA.crossover(parentB);
-			child.mutation();
-			newpics.push_back(child);
+			DNA* parentA = matingpool[Random(matingpool.size())].dna;
+			DNA* parentB = matingpool[Random(matingpool.size())].dna;
+			DNA* child = parentA->crossover(parentB);
+			child->mutation();
+			newpics[i] = Pic(child);
 		}
+		delete[] pics;
 		pics = newpics;
 		generation++;
 	}

@@ -1,8 +1,6 @@
-#include "Triangle.cpp"
+#include "DNA.cpp"
 #include <vector>
 
-const int AMOUNT = 15;
-const float MUTATION_RATE = 0.02;
 Image* img;
 
 double color_dist(COLORREF color1,COLORREF color2){
@@ -14,39 +12,35 @@ double color_dist(COLORREF color1,COLORREF color2){
 
 class Pic{
 public:
-	vector<Triangle> genes;
+	DNA* dna;
 	double fitness;
+	
 	Pic(){
+		dna = new DNA;
 		fitness = 0;
-		for (int i=0;i<AMOUNT;i++){
-			genes.push_back(Triangle());
-		}
 	}
 	
-	Pic(vector<Triangle> newgenes){
+	Pic(DNA* new_dna){
 		fitness = 0;
-		genes = newgenes;
+		dna = new_dna;
 	}
 	
-	Pic crossover(Pic partner){
-		vector<Triangle> newgenes;
-		int mid = AMOUNT/2;
-		for (int i=0;i<AMOUNT;i++){
-			if (i > mid){
-				newgenes.push_back(genes[i]);
-			} else {
-				newgenes.push_back(partner.genes[i]);
-			}
-		}
-		return Pic(newgenes);
+	Pic(const Pic &obj) {
+		dna = new DNA(*(obj.dna));
+		fitness = obj.fitness;
 	}
 	
-	void mutation(){
-		for (int i=0;i<AMOUNT;i++){
-			if (RandomF(1) < MUTATION_RATE){
-				genes[i] = Triangle();
-			}
-		}
+	const Pic &operator=(const Pic &other)
+	{
+		if(this == &other) return *this; // handling of self assignment, thanks for your advice, arul.
+		delete dna; // freeing previously used memory
+		dna = new DNA(*(other.dna));
+		fitness = other.fitness;
+		return *this;
+	}
+	
+	~Pic(){
+		delete dna;
 	}
 	
 	void calaFitness(){
@@ -64,8 +58,6 @@ public:
 	
 	void show(){
 		background();
-		for (int i=0;i<AMOUNT;i++){
-			genes[i].show();
-		}
+		dna->show();
 	}
 };
