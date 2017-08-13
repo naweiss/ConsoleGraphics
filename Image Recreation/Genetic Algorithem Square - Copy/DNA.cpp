@@ -1,17 +1,17 @@
-#include "Triangle.cpp"
+#include "Square.cpp"
 
-const int AMOUNT = 10;
+const int AMOUNT = 100;
 const float MUTATION_RATE = 0.02;
 
 class DNA{
 public:
-	Triangle* genes;
+	Square* genes;
 
 	DNA(){
-		genes = new Triangle[AMOUNT];
+		genes = new Square[AMOUNT];
 	}
 	
-	DNA(Triangle* newgenes){
+	DNA(Square* newgenes){
 		genes = newgenes;
 	}
 	
@@ -20,8 +20,7 @@ public:
 	}
 	
 	DNA* crossover(DNA* partner){
-		return new DNA();
-		Triangle* newgenes = new Triangle[AMOUNT];
+		Square* newgenes = new Square[AMOUNT];
 		int mid = AMOUNT/2;
 		for (int i=0;i<AMOUNT;i++){
 			if (i > mid){
@@ -36,7 +35,7 @@ public:
 	void mutation(){
 		for (int i=0;i<AMOUNT;i++){
 			if (RandomF(1) < MUTATION_RATE){
-				genes[i] = Triangle();
+				genes[i] = Square();
 			}
 		}
 	}

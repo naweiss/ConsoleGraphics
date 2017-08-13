@@ -6,20 +6,24 @@ Population* pop;
 
 void setup(){
 	srand(time(NULL));
+	noStroke();
 	myfile.open ("log.txt");
-	img = loadImage("halfs.bmp");
+	img = loadImage("halfs2.bmp");
 	width = img->width;
 	height = img->height;
 	pop = new Population();
 }
 
 void draw(){
-	background();
 	if (GetForegroundWindow() == myconsole){
 		int key = keysDown();
 		switch(key){
 			case 80:
 				while(keysDown()!=80);
+				break;
+			case 83:
+				string passed = "finess_"+to_string(bestFitness)+".bmp";
+				SaveBMP(bestImg,passed.c_str());
 				break;
 		}
 	}
@@ -32,9 +36,9 @@ void draw(){
 	}
 	fill(RGB(255,0,0));
 	string passed = "gen: "+to_string(pop->generation);
-	drawText(width - 60,0,passed.c_str(),passed.length());
+	drawText(0,0,passed.c_str(),passed.length());
 	passed = "index: "+to_string(index);
-	drawText(width - 70,20,passed.c_str(),passed.length());
+	drawText(0,20,passed.c_str(),passed.length());
 	passed = "best: "+to_string(bestFitness);
-	drawText(width - 100,40,passed.c_str(),passed.length());
+	drawText(0,40,passed.c_str(),passed.length());
 }

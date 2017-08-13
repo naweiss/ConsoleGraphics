@@ -34,7 +34,7 @@ public:
 		double sum = 0;
 		for (int i=0;i<img->width;i++){
 			for (int j=0;j<img->height;j++){
-				sum += color_dist(img->get(i,j),canvas->get(i,j));
+				sum += color_dist(canvas->get(i,j),img->get(i,j));
 			}
 		}
 		delete canvas;

@@ -4,9 +4,10 @@
 #include <fstream>
 #include <iomanip>
 
-const int POP_SIZE = 100;
+const int POP_SIZE = 200;
 ofstream myfile;
 double bestFitness = 0;
+Image* bestImg;
 
 class Population{
 private:
@@ -36,6 +37,10 @@ public:
 	
 	void evaluate(short index){
 		pics[index]->calaFitness();
+		if (pics[index]->fitness > bestFitness){
+			bestFitness = pics[index]->fitness;
+			bestImg = GetCanvas();
+		}
 	}
 	
 	void evaluate(){
@@ -46,9 +51,6 @@ public:
 			sum += current;
 			if (current > maxfit){
 				maxfit = current;
-				if (current > bestFitness){
-					bestFitness = current;
-				}
 			}
 		}
 		myfile << fixed << setprecision(4) << sum/POP_SIZE << "\t" << maxfit << endl;

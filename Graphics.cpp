@@ -38,6 +38,13 @@ struct Image{
 		return RGB(pixels[index+2],pixels[index+1],pixels[index]);
 	}
 	
+	void set(int x,int y, COLORREF color){
+		int index = (x+y*width)*Bpp;
+		pixels[index+2] = GetRValue(color);
+		pixels[index+1] = GetGValue(color);
+		pixels[index]   = GetBValue(color);
+	}
+	
 	~Image() {
          delete pixels;
     }
