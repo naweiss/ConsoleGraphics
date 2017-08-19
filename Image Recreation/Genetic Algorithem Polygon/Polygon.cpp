@@ -18,8 +18,8 @@ Population* pop;
 
 void setup(){
 	srand(time(NULL));
-	myfile.open ("log.txt");
-	img = loadImage("halfs2.bmp");
+	myfile.open("log.txt");
+	img = loadImage("halfs.bmp");
 	// image_gray_scale(img);
 	// SaveBMP(img,"gs_halfs.bmp");
 	width = img->width;

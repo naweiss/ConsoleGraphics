@@ -1,6 +1,6 @@
 #include "Triangle.cpp"
 
-const int AMOUNT = 10;
+const int AMOUNT = 15;
 const float MUTATION_RATE = 0.02;
 
 class DNA{

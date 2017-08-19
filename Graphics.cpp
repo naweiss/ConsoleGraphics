@@ -303,7 +303,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam){
         // Gets the WorkerW Window after the current one.
         myconsole = FindWindowEx(NULL, hwnd, "WorkerW", NULL);
     }
-	DeleteObject(p);/**************/
+	DeleteObject(p);
 	return TRUE;
 }
 
@@ -324,7 +324,7 @@ void findDesktopBackGround(){
 		1000,
 		NULL
 	);
-	DeleteObject(parentFolderView);/**************/
+	DeleteObject(parentFolderView);
 	EnumWindows(EnumWindowsProc, NULL);
 }
 #endif
@@ -422,6 +422,7 @@ Image* loadImage(const char *name){
 	img->pixels = new BYTE[sizeOrig];
 	img->Bpp = BMp.bmWidthBytes/BMp.bmWidth;
     GetBitmapBits(hBMP, sizeOrig, img->pixels);
+	DeleteObject(hBMP);
 	return img;
 }
 
@@ -454,6 +455,34 @@ Image* GetCanvas(){
 	return img;
 }
 
+bool drawImage(Image* img){
+	HBITMAP hBmp = CreateCompatibleBitmap(bufDC, img->width, img->height);
+	BITMAPINFO info;
+	memset(&info, 0, sizeof(BITMAPINFO));
+	info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	info.bmiHeader.biWidth = img->width;
+	info.bmiHeader.biHeight = img->height;
+	info.bmiHeader.biPlanes = 1;	
+	info.bmiHeader.biBitCount = 8*(img->Bpp);
+	info.bmiHeader.biCompression = BI_RGB; 
+	if (NULL == SetDIBits(bufDC, hBmp, 0, img->height, img->pixels, &info, DIB_RGB_COLORS)){
+		DeleteObject(hBmp);
+		return false;
+	}
+	if (NULL == SelectObject(bufDC, hBmp)){
+		DeleteObject(hBmp);
+		return false;
+	}
+	return true;
+	// HBITMAP hBmp = CreateCompatibleBitmap(bufDC, img->width, img->height);
+	// long BufferSize = (img->width*img->height)*img->Bpp;
+	// SetBitmapBits(hBmp, BufferSize, img->pixels);
+	// SetDIBits(bufDC,hBmp);
+	// bool success = (NULL != SelectObject(bufDC, hBmp));
+	// DeleteObject(hBmp);
+	// return success;
+}
+
 bool SaveBMP(Image* img, LPCTSTR bmpfile){
 	long BufferSize = (img->width*img->height)*img->Bpp;
 	BITMAPFILEHEADER bmfh;
@@ -461,22 +490,14 @@ bool SaveBMP(Image* img, LPCTSTR bmpfile){
 	memset(&bmfh, 0, sizeof(BITMAPFILEHEADER));
 	memset(&info, 0, sizeof(BITMAPINFOHEADER));
 	bmfh.bfType = 0x4d42;// 0x4d42 = 'BM'
-	bmfh.bfReserved1 = 0;
-	bmfh.bfReserved2 = 0;
-	bmfh.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + BufferSize;
-	bmfh.bfOffBits = 0x36;
+	bmfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 	info.biSize = sizeof(BITMAPINFOHEADER);
 	info.biWidth = img->width;
 	info.biHeight = img->height;
 	info.biPlanes = 1;	
 	info.biBitCount = 8*(img->Bpp);
-	info.biCompression = BI_RGB;	
-	info.biSizeImage = 0;
-	info.biXPelsPerMeter = 0x0ec4;  
-	info.biYPelsPerMeter = 0x0ec4;     
-	info.biClrUsed = 0;	
-	info.biClrImportant = 0; 
-	HANDLE file = CreateFile (bmpfile , GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
+	info.biCompression = BI_RGB; 
+	HANDLE file = CreateFile(bmpfile, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(NULL == file){
 		CloseHandle(file);
 		return false;

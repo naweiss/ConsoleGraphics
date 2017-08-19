@@ -8,7 +8,7 @@ void setup(){
 	srand(time(NULL));
 	noStroke();
 	myfile.open ("log.txt");
-	img = loadImage("halfs2.bmp");
+	img = loadImage("halfs3.bmp");
 	width = img->width;
 	height = img->height;
 	pop = new Population();

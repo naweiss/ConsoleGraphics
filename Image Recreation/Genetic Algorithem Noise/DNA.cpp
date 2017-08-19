@@ -44,7 +44,7 @@ public:
 		for(long i=0;i<size;i++){
 			sum += abs(img->pixels[i*img->Bpp]-genes[i]);
 		}
-		return pow(size - sum/255,4)/pow(size,4);
+		return (size - sum/255)/size;
 	}
 	
 	void show(){
