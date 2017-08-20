@@ -1,8 +1,6 @@
 #include "DNA.cpp"
 #include <vector>
 
-Image* img;
-
 double color_dist(COLORREF color1,COLORREF color2){
 	double r = abs(GetRValue(color1)-GetRValue(color2));
 	double g = abs(GetGValue(color1)-GetGValue(color2));
@@ -30,7 +28,7 @@ public:
 	}
 	
 	void calaFitness(){
-		Image* canvas = GetCanvas();
+		Image* canvas = GetCanvas(img->width,img->height);
 		double sum = 0;
 		for (int i=0;i<img->width;i++){
 			for (int j=0;j<img->height;j++){

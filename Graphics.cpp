@@ -406,81 +406,92 @@ void doDraw(){
 }
 
 Image* loadImage(const char *name){
+	HDC hCompDC = CreateCompatibleDC(bufDC);
 	HBITMAP hBMP = (HBITMAP)LoadImageA( NULL, name , IMAGE_BITMAP, 0, 0,
                LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
-	if (hBMP == NULL){
+	if (NULL == SelectObject(hCompDC, hBMP)){
 		DeleteObject(hBMP);
+		DeleteDC(hCompDC);
 		return NULL;
 	}
-	BITMAP BMp;
-	if (0 == GetObject(hBMP, sizeof(BITMAP), &BMp)){
+	BITMAPINFO info = {0};
+	info.bmiHeader.biSize = sizeof(info.bmiHeader);
+	if(NULL == GetDIBits(hCompDC, hBMP, 0, 0, NULL, &info, DIB_RGB_COLORS)){
 		DeleteObject(hBMP);
+		DeleteDC(hCompDC);
 		return NULL;
 	}
-    int sizeOrig = BMp.bmWidthBytes * BMp.bmHeight;
-	Image* img = new Image(BMp.bmWidth, BMp.bmHeight);
-	img->pixels = new BYTE[sizeOrig];
-	img->Bpp = BMp.bmWidthBytes/BMp.bmWidth;
-    GetBitmapBits(hBMP, sizeOrig, img->pixels);
+	Image* img = new Image(info.bmiHeader.biWidth, info.bmiHeader.biHeight);
+	img->pixels = new BYTE[info.bmiHeader.biSizeImage];
+	img->Bpp = info.bmiHeader.biBitCount/8;
+	GetDIBits(hCompDC, hBMP, 0, height, img->pixels, &info, DIB_RGB_COLORS);
 	DeleteObject(hBMP);
+	DeleteDC(hCompDC);
 	return img;
 }
 
-Image* GetCanvas(){
+Image* GetCanvas(int x2 = width, int y2 = height, int x = 0, int y =0){
+	x2 -= x;
+	y2 -= y;
 	HDC hCompDC = CreateCompatibleDC(bufDC);
-	HBITMAP hBmp = CreateCompatibleBitmap(bufDC, width, height);
+	HBITMAP hBmp = CreateCompatibleBitmap(bufDC, x2, y2);
 	if (NULL == SelectObject(hCompDC, hBmp)){
 		DeleteDC(hCompDC);
 		DeleteObject(hBmp);
 		return NULL;
 	}
-	if (NULL == BitBlt(hCompDC, 0, 0, width, height, bufDC, 0, 0, SRCCOPY)){
+	if (NULL == BitBlt(hCompDC, 0, 0, x2, y2, bufDC, x, y, SRCCOPY)){
 		DeleteDC(hCompDC);
 		DeleteObject(hBmp);
 		return NULL;
 	}
-	BITMAP BMp;
-	if (NULL == GetObject(hBmp, sizeof(BITMAP), &BMp)){
-		DeleteDC(hCompDC);
-		DeleteObject(hBmp);
-		return NULL;
-	}
-    int sizeOrig = BMp.bmWidthBytes * BMp.bmHeight;
-	Image* img = new Image(BMp.bmWidth, BMp.bmHeight);
+	
+	int sizeOrig = x2*y2*4;
+	Image* img = new Image(x2, y2);
 	img->pixels = new BYTE[sizeOrig];
-	img->Bpp = BMp.bmWidthBytes/BMp.bmWidth;
-    GetBitmapBits(hBmp, sizeOrig, img->pixels);
+	img->Bpp = 4;
+	BITMAPINFO info;
+	memset(&info, 0, sizeof(BITMAPINFO));
+	info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+	info.bmiHeader.biWidth = x2;
+	info.bmiHeader.biHeight = y2;
+	info.bmiHeader.biPlanes = 1;	
+	info.bmiHeader.biBitCount = 32;
+	info.bmiHeader.biCompression = BI_RGB; 
+	GetDIBits(hCompDC, hBmp, 0, y2, img->pixels, &info, DIB_RGB_COLORS);
 	DeleteDC(hCompDC);
 	DeleteObject(hBmp);
 	return img;
 }
 
-bool drawImage(Image* img){
+bool drawImage(Image* img, int x = 0, int y = 0){
+	HDC hCompDC = CreateCompatibleDC(bufDC);
 	HBITMAP hBmp = CreateCompatibleBitmap(bufDC, img->width, img->height);
-	BITMAPINFO info;
-	memset(&info, 0, sizeof(BITMAPINFO));
+	BITMAPINFO info = {0};
 	info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	info.bmiHeader.biWidth = img->width;
 	info.bmiHeader.biHeight = img->height;
 	info.bmiHeader.biPlanes = 1;	
 	info.bmiHeader.biBitCount = 8*(img->Bpp);
 	info.bmiHeader.biCompression = BI_RGB; 
-	if (NULL == SetDIBits(bufDC, hBmp, 0, img->height, img->pixels, &info, DIB_RGB_COLORS)){
+	if (NULL == SetDIBits(hCompDC, hBmp, 0, img->height, img->pixels, &info, DIB_RGB_COLORS)){
 		DeleteObject(hBmp);
+		DeleteDC(hCompDC);
 		return false;
 	}
-	if (NULL == SelectObject(bufDC, hBmp)){
+	if (NULL == SelectObject(hCompDC, hBmp)){
 		DeleteObject(hBmp);
+		DeleteDC(hCompDC);
 		return false;
 	}
+	if (NULL == BitBlt(bufDC, x, y, img->width, img->height, hCompDC, 0, 0, SRCCOPY)){
+		DeleteObject(hBmp);
+		DeleteDC(hCompDC);
+		return false;
+	}
+	DeleteObject(hBmp);
+	DeleteDC(hCompDC);
 	return true;
-	// HBITMAP hBmp = CreateCompatibleBitmap(bufDC, img->width, img->height);
-	// long BufferSize = (img->width*img->height)*img->Bpp;
-	// SetBitmapBits(hBmp, BufferSize, img->pixels);
-	// SetDIBits(bufDC,hBmp);
-	// bool success = (NULL != SelectObject(bufDC, hBmp));
-	// DeleteObject(hBmp);
-	// return success;
 }
 
 bool SaveBMP(Image* img, LPCTSTR bmpfile){

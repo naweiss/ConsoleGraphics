@@ -5,7 +5,6 @@ void setup(){
 }
 
 void draw(){
-	Sleep(100);
 	short rect_size = 30, grid_size = 15 ,border = 20;
 	for (int i = 0; i < grid_size*2; i++)
 	{

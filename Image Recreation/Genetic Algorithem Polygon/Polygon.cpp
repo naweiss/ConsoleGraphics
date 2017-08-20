@@ -35,7 +35,7 @@ void draw(){
 				while(keysDown()!=80);
 				break;
 			case 83:
-				string passed = "finess_"+to_string(bestFitness)+".bmp";
+				string passed = "fitness_"+to_string(bestFitness)+".bmp";
 				SaveBMP(bestImg,passed.c_str());
 				break;
 		}

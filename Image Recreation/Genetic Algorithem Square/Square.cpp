@@ -1,6 +1,8 @@
 #include "Graphics.cpp"
 #include "Vector.cpp"
 
+Image* img;
+
 class Square{
 public:
 	Vector p;
@@ -9,9 +11,17 @@ public:
 	COLORREF color;
 	
 	Square(){
-		p = Vector::random2D()*RandomF(width);
-		w = Random(width);
-		h = Random(height);
+		p = Vector::random2D()*RandomF(img->width);
+		w = Random(img->width);
+		h = Random(img->height);
+		if (p.x < 0)
+			p.x = 0;
+		if (p.y < 0)
+			p.y = 0;
+		if (w+p.x > img->width)
+			w = img->width-p.x;
+		if (h+p.y > img->height)
+			h = img->height-p.y;
 		int num = Random(2) == 1 ? 255 : 0;
 		color = RGB(num,num,num);
 	}
