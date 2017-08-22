@@ -20,10 +20,6 @@ void setup(){
 	srand(time(NULL));
 	myfile.open("log.txt");
 	img = loadImage("halfs.bmp");
-	// image_gray_scale(img);
-	// SaveBMP(img,"gs_halfs.bmp");
-	width = img->width;
-	height = img->height;
 	pop = new Population();
 }
 
@@ -49,9 +45,9 @@ void draw(){
 	}
 	fill(RGB(255,0,0));
 	string passed = "gen: "+to_string(pop->generation);
-	drawText(0,0,passed.c_str(),passed.length());
+	drawText(img->width+10,0,passed.c_str(),passed.length());
 	passed = "index: "+to_string(index);
-	drawText(0,20,passed.c_str(),passed.length());
+	drawText(img->width+10,20,passed.c_str(),passed.length());
 	passed = "best: "+to_string(bestFitness);
-	drawText(0,40,passed.c_str(),passed.length());
+	drawText(img->width+10,40,passed.c_str(),passed.length());
 }

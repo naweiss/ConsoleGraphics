@@ -39,7 +39,7 @@ public:
 		pics[index]->calaFitness();
 		if (pics[index]->fitness > bestFitness){
 			bestFitness = pics[index]->fitness;
-			bestImg = GetCanvas();
+			bestImg = GetCanvas(img->width,img->height);
 		}
 	}
 	

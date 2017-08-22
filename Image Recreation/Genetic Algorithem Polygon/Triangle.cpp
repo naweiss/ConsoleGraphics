@@ -1,6 +1,8 @@
 #include "Graphics.cpp"
 #include "Vector.cpp"
 
+Image* img;
+
 class Triangle{
 public:
 	Vector p1;
@@ -10,11 +12,11 @@ public:
 	COLORREF color;
 	
 	Triangle(){
-		r = b = width;
+		r = b = img->width;
 		l = t = 0;
-		p1 = Vector::random2D()*RandomF(width/2)+Vector(width/2,width/2);
-		p2 = Vector::random2D()*RandomF(width)+p1;
-		p3 = Vector::random2D()*RandomF(width)+p1;
+		p1 = Vector::random2D()*RandomF(r/2)+Vector(r/2,r/2);
+		p2 = Vector::random2D()*RandomF(r)+p1;
+		p3 = Vector::random2D()*RandomF(r)+p1;
 		// int num = Random(256);
 		int num = Random(2) == 1 ? 255 : 0;
 		color = RGB(num,num,num);
@@ -25,7 +27,7 @@ public:
 	}
 	
 	Triangle(Vector p1, Vector p2, Vector p3, COLORREF color){
-		r = b = width;
+		r = b = img->width;
 		l = t = 0;
 		this->p1 = p1;
 		this->p2 = p2;
@@ -61,12 +63,11 @@ public:
 			t = p.y;
 	}
 	
-	void show(){
-		fill(color);
+	void show(Image* my_img){
 		for (int i = r;i < l;i++){
 			for (int j = b;j < t;j++){
 				if (inside_triangle(Vector(i,j))){
-					SetPixelC(i,j);
+					my_img->set(i,j,this->color);
 				}
 			}
 		}

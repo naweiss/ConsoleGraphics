@@ -5,7 +5,6 @@
 #include <iomanip>
 
 const int POP_SIZE = 150;
-ofstream myfile;
 double bestFitness = 0;
 Image* bestImg;
 
@@ -53,7 +52,6 @@ public:
 				maxfit = current;
 			}
 		}
-		myfile << fixed << setprecision(4) << sum/POP_SIZE << "\t" << maxfit << endl;
 		for(int i=0;i<POP_SIZE;i++){
 			pics[i]->fitness /= maxfit;
 		}

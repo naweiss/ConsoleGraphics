@@ -12,11 +12,11 @@ static int height = -1;//Height of the canvas/screen
 
 //Struct for point in 2d
 struct Point{
-   int x;
-   int y;
+   float x;
+   float y;
    COLORREF color;
    Point(){}
-   Point(int x,int y){
+   Point(float x,float y){
 	   this->x = x;
 	   this->y = y;
    }
@@ -28,25 +28,33 @@ struct Image{
 	int Bpp;
 	BYTE* pixels;
 	
-	Image(int width, int height) {
+	Image(int width, int height, int Bpp) {
 		this->width = width;
 		this->height = height;
+		this->Bpp = Bpp;
+		this->pixels = new BYTE[Bpp*width*height];
 	}
 	
 	COLORREF get(int x,int y){
-		int index = (x+y*width)*Bpp;
-		return RGB(pixels[index+2],pixels[index+1],pixels[index]);
+		if (x < this->width && y < this->height){
+			int index = (x+y*this->width)*this->Bpp;
+			return RGB(this->pixels[index+2],this->pixels[index+1],this->pixels[index]);
+		}
+		return NULL;
 	}
 	
 	void set(int x,int y, COLORREF color){
-		int index = (x+y*width)*Bpp;
-		pixels[index+2] = GetRValue(color);
-		pixels[index+1] = GetGValue(color);
-		pixels[index]   = GetBValue(color);
+		if (x >=0 && y >= 0 && x < this->width && y < this->height){
+			int index = (x+y*this->width)*this->Bpp;
+			this->pixels[index+2] = GetRValue(color);
+			this->pixels[index+1] = GetGValue(color);
+			this->pixels[index]   = GetBValue(color);
+		}
 	}
 	
 	~Image() {
-         delete pixels;
+		if (this->pixels)
+			delete[] this->pixels;
     }
 };
 
@@ -240,7 +248,10 @@ void drawCircle(int x0, int y0, int r){
 
 //Draw unicode text of length = len, in (x,y) 
 void drawText(int x0, int y0,wchar_t* txt, int len){
-	SetTextColor(bufDC,fill_color);
+	if (do_fill)
+		SetTextColor(bufDC,fill_color);
+	else
+		SetTextColor(bufDC,stroke_color);
 	SetBkMode(bufDC,TRANSPARENT);
 	TextOutW(bufDC, x0, y0, txt,len);
 	SetBkMode(bufDC,OPAQUE);
@@ -248,7 +259,10 @@ void drawText(int x0, int y0,wchar_t* txt, int len){
 
 //Draw ascii text of length = len, in (x,y) 
 void drawText(int x0, int y0,const char* txt, int len){
-	SetTextColor(bufDC,fill_color);
+	if (do_fill)
+		SetTextColor(bufDC,fill_color);
+	else
+		SetTextColor(bufDC,stroke_color);
 	SetBkMode(bufDC,TRANSPARENT);
 	TextOutA(bufDC, x0, y0, txt,len);
 	SetBkMode(bufDC,OPAQUE);
@@ -421,10 +435,8 @@ Image* loadImage(const char *name){
 		DeleteDC(hCompDC);
 		return NULL;
 	}
-	Image* img = new Image(info.bmiHeader.biWidth, info.bmiHeader.biHeight);
-	img->pixels = new BYTE[info.bmiHeader.biSizeImage];
-	img->Bpp = info.bmiHeader.biBitCount/8;
-	GetDIBits(hCompDC, hBMP, 0, height, img->pixels, &info, DIB_RGB_COLORS);
+	Image* img = new Image(info.bmiHeader.biWidth, info.bmiHeader.biHeight,info.bmiHeader.biBitCount/8);
+	GetDIBits(hCompDC, hBMP, 0, info.bmiHeader.biHeight, img->pixels, &info, DIB_RGB_COLORS);
 	DeleteObject(hBMP);
 	DeleteDC(hCompDC);
 	return img;
@@ -446,12 +458,8 @@ Image* GetCanvas(int x2 = width, int y2 = height, int x = 0, int y =0){
 		return NULL;
 	}
 	
-	int sizeOrig = x2*y2*4;
-	Image* img = new Image(x2, y2);
-	img->pixels = new BYTE[sizeOrig];
-	img->Bpp = 4;
-	BITMAPINFO info;
-	memset(&info, 0, sizeof(BITMAPINFO));
+	Image* img = new Image(x2, y2,4);
+	BITMAPINFO info = {0};
 	info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 	info.bmiHeader.biWidth = x2;
 	info.bmiHeader.biHeight = y2;
@@ -496,10 +504,8 @@ bool drawImage(Image* img, int x = 0, int y = 0){
 
 bool SaveBMP(Image* img, LPCTSTR bmpfile){
 	long BufferSize = (img->width*img->height)*img->Bpp;
-	BITMAPFILEHEADER bmfh;
-	BITMAPINFOHEADER info;
-	memset(&bmfh, 0, sizeof(BITMAPFILEHEADER));
-	memset(&info, 0, sizeof(BITMAPINFOHEADER));
+	BITMAPFILEHEADER bmfh = {};
+	BITMAPINFOHEADER info = {};
 	bmfh.bfType = 0x4d42;// 0x4d42 = 'BM'
 	bmfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 	info.biSize = sizeof(BITMAPINFOHEADER);
