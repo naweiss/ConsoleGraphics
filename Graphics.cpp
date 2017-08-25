@@ -32,12 +32,15 @@ struct Image{
 		this->width = width;
 		this->height = height;
 		this->Bpp = Bpp;
-		this->pixels = new BYTE[Bpp*width*height];
+		// ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
+		this->pixels = new BYTE[((Bpp*width+3) & ~3)*height];
 	}
 	
 	COLORREF get(int x,int y){
 		if (x < this->width && y < this->height){
-			int index = (x+y*this->width)*this->Bpp;
+			// ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
+			int index = y*((this->width*this->Bpp+3)& ~3)+x*this->Bpp;
+			
 			return RGB(this->pixels[index+2],this->pixels[index+1],this->pixels[index]);
 		}
 		return NULL;
@@ -45,7 +48,9 @@ struct Image{
 	
 	void set(int x,int y, COLORREF color){
 		if (x >=0 && y >= 0 && x < this->width && y < this->height){
-			int index = (x+y*this->width)*this->Bpp;
+			// ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
+			int index = y*((this->width*this->Bpp+3)& ~3)+x*this->Bpp;
+			
 			this->pixels[index+2] = GetRValue(color);
 			this->pixels[index+1] = GetGValue(color);
 			this->pixels[index]   = GetBValue(color);
