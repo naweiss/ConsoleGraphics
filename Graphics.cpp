@@ -3,7 +3,7 @@
 #define ROUND(a) ((int) (a + 0.5)) //Round function
 
 //#define DESKTOP_BG_ //Console window as desktop background
-//#define OVERLAY_BG_ //Console window shold merge with existing bacground
+//#define OVERLAY_BG_ //Console window shold merge with existing background
 //#define OVERLAY_BG_ALPHA 50
 using namespace std;
 
@@ -420,89 +420,84 @@ void doDraw(){
 }
 
 Image* loadImage(const char *name){
+	Image* img = NULL;
 	HDC hCompDC = CreateCompatibleDC(bufDC);
-	HBITMAP hBMP = (HBITMAP)LoadImageA( NULL, name , IMAGE_BITMAP, 0, 0,
-               LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
-	if (NULL == SelectObject(hCompDC, hBMP)){
-		DeleteObject(hBMP);
+	if (NULL != hCompDC){
+		HBITMAP hBMP = (HBITMAP)LoadImageA( NULL, name , IMAGE_BITMAP, 0, 0,
+				   LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
+		if (NULL != hBMP){
+			if (NULL != SelectObject(hCompDC, hBMP)){
+				BITMAPINFO info = {0};
+				info.bmiHeader.biSize = sizeof(info.bmiHeader);
+				if(NULL != GetDIBits(hCompDC, hBMP, 0, 0, NULL, &info, DIB_RGB_COLORS)){
+					img = new Image(info.bmiHeader.biWidth, info.bmiHeader.biHeight,info.bmiHeader.biBitCount/8);
+					GetDIBits(hCompDC, hBMP, 0, info.bmiHeader.biHeight, img->pixels, &info, DIB_RGB_COLORS);
+				}
+			}
+			DeleteObject(hBMP);
+		}
 		DeleteDC(hCompDC);
-		return NULL;
 	}
-	BITMAPINFO info = {0};
-	info.bmiHeader.biSize = sizeof(info.bmiHeader);
-	if(NULL == GetDIBits(hCompDC, hBMP, 0, 0, NULL, &info, DIB_RGB_COLORS)){
-		DeleteObject(hBMP);
-		DeleteDC(hCompDC);
-		return NULL;
-	}
-	Image* img = new Image(info.bmiHeader.biWidth, info.bmiHeader.biHeight,info.bmiHeader.biBitCount/8);
-	GetDIBits(hCompDC, hBMP, 0, info.bmiHeader.biHeight, img->pixels, &info, DIB_RGB_COLORS);
-	DeleteObject(hBMP);
-	DeleteDC(hCompDC);
 	return img;
 }
 
 Image* GetCanvas(int x2 = width, int y2 = height, int x = 0, int y =0){
+	Image* img = NULL;
 	x2 -= x;
 	y2 -= y;
 	HDC hCompDC = CreateCompatibleDC(bufDC);
-	HBITMAP hBmp = CreateCompatibleBitmap(bufDC, x2, y2);
-	if (NULL == SelectObject(hCompDC, hBmp)){
+	if (NULL != hCompDC){
+		HBITMAP hBmp = CreateCompatibleBitmap(bufDC, x2, y2);
+		if (NULL != hBmp){
+			if (NULL != SelectObject(hCompDC, hBmp)){
+				if (NULL != BitBlt(hCompDC, 0, 0, x2, y2, bufDC, x, y, SRCCOPY)){
+					img = new Image(x2, y2,4);
+					BITMAPINFO info = {0};
+					info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+					info.bmiHeader.biWidth = x2;
+					info.bmiHeader.biHeight = y2;
+					info.bmiHeader.biPlanes = 1;	
+					info.bmiHeader.biBitCount = 32;
+					info.bmiHeader.biCompression = BI_RGB; 
+					GetDIBits(hCompDC, hBmp, 0, y2, img->pixels, &info, DIB_RGB_COLORS);
+				}
+			}
+			DeleteObject(hBmp);
+		}
 		DeleteDC(hCompDC);
-		DeleteObject(hBmp);
-		return NULL;
 	}
-	if (NULL == BitBlt(hCompDC, 0, 0, x2, y2, bufDC, x, y, SRCCOPY)){
-		DeleteDC(hCompDC);
-		DeleteObject(hBmp);
-		return NULL;
-	}
-	
-	Image* img = new Image(x2, y2,4);
-	BITMAPINFO info = {0};
-	info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	info.bmiHeader.biWidth = x2;
-	info.bmiHeader.biHeight = y2;
-	info.bmiHeader.biPlanes = 1;	
-	info.bmiHeader.biBitCount = 32;
-	info.bmiHeader.biCompression = BI_RGB; 
-	GetDIBits(hCompDC, hBmp, 0, y2, img->pixels, &info, DIB_RGB_COLORS);
-	DeleteDC(hCompDC);
-	DeleteObject(hBmp);
 	return img;
 }
 
 bool drawImage(Image* img, int x = 0, int y = 0){
+	bool success = false;
 	HDC hCompDC = CreateCompatibleDC(bufDC);
-	HBITMAP hBmp = CreateCompatibleBitmap(bufDC, img->width, img->height);
-	BITMAPINFO info = {0};
-	info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	info.bmiHeader.biWidth = img->width;
-	info.bmiHeader.biHeight = img->height;
-	info.bmiHeader.biPlanes = 1;	
-	info.bmiHeader.biBitCount = 8*(img->Bpp);
-	info.bmiHeader.biCompression = BI_RGB; 
-	if (NULL == SetDIBits(hCompDC, hBmp, 0, img->height, img->pixels, &info, DIB_RGB_COLORS)){
-		DeleteObject(hBmp);
+	if (NULL != hCompDC){
+		HBITMAP hBmp = CreateCompatibleBitmap(bufDC, img->width, img->height);
+		if (NULL != hBmp){
+			BITMAPINFO info = {0};
+			info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+			info.bmiHeader.biWidth = img->width;
+			info.bmiHeader.biHeight = img->height;
+			info.bmiHeader.biPlanes = 1;	
+			info.bmiHeader.biBitCount = 8*(img->Bpp);
+			info.bmiHeader.biCompression = BI_RGB; 
+			if (NULL != SetDIBits(hCompDC, hBmp, 0, img->height, img->pixels, &info, DIB_RGB_COLORS)){
+				if (NULL != SelectObject(hCompDC, hBmp)){
+					if (NULL != BitBlt(bufDC, x, y, img->width, img->height, hCompDC, 0, 0, SRCCOPY)){
+						success = true;
+					}
+				}
+			}
+			DeleteObject(hBmp);
+		}
 		DeleteDC(hCompDC);
-		return false;
 	}
-	if (NULL == SelectObject(hCompDC, hBmp)){
-		DeleteObject(hBmp);
-		DeleteDC(hCompDC);
-		return false;
-	}
-	if (NULL == BitBlt(bufDC, x, y, img->width, img->height, hCompDC, 0, 0, SRCCOPY)){
-		DeleteObject(hBmp);
-		DeleteDC(hCompDC);
-		return false;
-	}
-	DeleteObject(hBmp);
-	DeleteDC(hCompDC);
-	return true;
+	return success;
 }
 
 bool SaveBMP(Image* img, LPCTSTR bmpfile){
+	bool success = false;
 	long BufferSize = (img->width*img->height)*img->Bpp;
 	BITMAPFILEHEADER bmfh = {};
 	BITMAPINFOHEADER info = {};
@@ -515,25 +510,18 @@ bool SaveBMP(Image* img, LPCTSTR bmpfile){
 	info.biBitCount = 8*(img->Bpp);
 	info.biCompression = BI_RGB; 
 	HANDLE file = CreateFile(bmpfile, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if(NULL == file){
-		CloseHandle(file);
-		return false;
+	if(NULL != file){
+		unsigned long bwritten;
+		if(TRUE == WriteFile(file, &bmfh, sizeof(BITMAPFILEHEADER), &bwritten, NULL)){	
+			if(TRUE == WriteFile(file, &info, sizeof ( BITMAPINFOHEADER ), &bwritten, NULL)){	
+				if (TRUE == WriteFile(file, img->pixels, BufferSize, &bwritten, NULL )){	
+					success = true;
+				}
+			}
+		}
+		CloseHandle(file);	
 	}
-	unsigned long bwritten;
-	if(WriteFile(file, &bmfh, sizeof(BITMAPFILEHEADER), &bwritten, NULL) == false){	
-		CloseHandle(file);
-		return false;
-	}
-	if(WriteFile(file, &info, sizeof ( BITMAPINFOHEADER ), &bwritten, NULL) == false){	
-		CloseHandle(file);
-		return false;
-	}
-	if (WriteFile(file, img->pixels, BufferSize, &bwritten, NULL ) == false){	
-		CloseHandle(file);
-		return false;
-	}
-	CloseHandle(file);
-	return true;
+	return success;
 }
 
 void nextFrame(){

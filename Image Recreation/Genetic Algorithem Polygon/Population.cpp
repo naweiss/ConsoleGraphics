@@ -39,6 +39,8 @@ public:
 		pics[index]->calaFitness();
 		if (pics[index]->fitness > bestFitness){
 			bestFitness = pics[index]->fitness;
+			if (bestImg)
+				delete bestImg;
 			bestImg = GetCanvas(img->width,img->height);
 		}
 	}

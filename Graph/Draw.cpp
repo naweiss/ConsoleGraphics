@@ -3,24 +3,22 @@
 #include <ctime>
 
 Graph* g;
-int n = 4;
+int n = 8;
 
 void setup(){
 	srand(time(NULL));
-	g = new Graph(n,1200,500,50,50);
-	vector<Point> vec;
-	for (int i = 0; i < n; i++)
-		vec.push_back(Point(-1000,RandomF(-1000,1000)));
-	g->addGen(vec);
+	g = new Graph(n,500,250,50,50);
+	// g->setMode(Graph::DOTS);
+	g->setGensLimit(20);
 }
 
 void draw(){
 	background();
-	g->show();
-	Sleep(500);
 	vector<Point> vec;
 	for (int i = 0; i < n; i++)
-		vec.push_back(Point(frameCount*100-1000,RandomF(-1000,1000)));
+			vec.push_back(Point(frameCount,sin(frameCount+i*HALF_PI/2)*100));
 	g->addGen(vec);
+	g->show();
+	Sleep(500);
 	// noLoop();
 }

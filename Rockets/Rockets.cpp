@@ -20,22 +20,25 @@ void setup(){
 void draw(){
 	if (GetForegroundWindow() == myconsole){
 		int key = keysDown();
-		switch(key){
-			case 80:
-				while(keysDown()!=80);
-				break;
-			case 188:
+		if(key == 80)
+			while(keysDown()!=80);
+		else{
+			if(isKeyDown(188))
 				sleep_time++;
-				break;
-			case 190:
-				if (sleep_time > 0)
-					sleep_time--;
-				break;
+			if(isKeyDown(190))
+				sleep_time--;
 		}
 	}
 	background();
 	pop->run();
 	n++;
+	if (sleep_time < 0){
+		for(int i = abs(sleep_time); i > 0 && n < lifespan; i--){
+			background();
+			pop->run();
+			n++;
+		}
+	}
 	if (n == lifespan){
 		n = 0;
 		pop->evaluate();

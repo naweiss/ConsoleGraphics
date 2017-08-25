@@ -2,24 +2,13 @@
 #include "Keyboard.cpp"
 #include <ctime>
 
-// COLORREF color_gray_scale(COLORREF color){
-	// //Gray-Scale color: 0.21 R + 0.72 G + 0.07 B.
-	// short bright= GetRValue(color)*0.21+GetGValue(color)*0.72+GetBValue(color)*0.07;
-	// return RGB(bright,bright,bright);
-// }
-
-// void image_gray_scale(Image* image){
-	// for(int i=0;i<image->width;i++)
-		// for(int j=0;j<image->height;j++)
-			// image->set(i,j,color_gray_scale(image->get(i,j)));
-// }
-
 Population* pop;
 
 void setup(){
 	srand(time(NULL));
 	myfile.open("log.txt");
 	img = loadImage("halfs.bmp");
+	bestImg = NULL;
 	pop = new Population();
 }
 
