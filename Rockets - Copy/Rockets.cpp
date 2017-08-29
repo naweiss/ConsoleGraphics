@@ -1,18 +1,15 @@
-#include "Population.h"
-#include "Graphics.h"
-#include "Keyboard.h"
+#include "Population.cpp"
+#include "Keyboard.cpp"
 #include <ctime>
 #include <string>
-#include <iostream>
-using namespace std;
 
 Population* pop;
 int sleep_time;
 
 void setup(){
 	srand(time(NULL));
-	width = width/2;
-	height = height/2;
+	width /=2;
+	height /= 2;
 	sleep_time = 0;
 	myfile.open ("log.txt");
 	pop = new Population();
@@ -21,7 +18,7 @@ void setup(){
 }
 
 void draw(){
-	if (isFocused()){
+	if (GetForegroundWindow() == myconsole){
 		int key = keysDown();
 		if(key == 80)
 			while(keysDown()!=80);

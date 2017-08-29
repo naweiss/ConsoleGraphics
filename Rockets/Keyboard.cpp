@@ -1,5 +1,7 @@
-const unsigned int NumberOfKeys = 256U;
-bool previousKeyboardState[NumberOfKeys];
+#include <Windows.h>
+
+static const unsigned int NumberOfKeys = 256U;
+static bool previousKeyboardState[NumberOfKeys];
 //Works fine.
 bool isKeyDown(int key)
 {

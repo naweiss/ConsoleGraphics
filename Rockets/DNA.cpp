@@ -1,39 +1,33 @@
-#include "Vector.cpp"
-#include <vector>
+#include "DNA.h"
+#include "Math.h"
 
-int lifespan = 400;
+DNA::DNA(){
+	for (int i=0;i<lifespan;i++){
+		genes.push_back(Vector::random2D()/5);
+	}
+}
 
-class DNA{
-public:
-	vector<Vector> genes;
-	DNA(){
-		for (int i=0;i<lifespan;i++){
-			genes.push_back(Vector::random2D()/5);
+DNA::DNA(vector<Vector> newgenes){
+	genes = newgenes;
+}
+
+DNA DNA::crossover(DNA partner){
+	vector<Vector> newgenes;
+	int mid = Random(lifespan);
+	for (int i=0;i<lifespan;i++){
+		if (i > mid){
+			newgenes.push_back(genes[i]);
+		} else {
+			newgenes.push_back(partner.genes[i]);
 		}
 	}
-	
-	DNA(vector<Vector> newgenes){
-		genes = newgenes;
-	}
-	
-	DNA crossover(DNA partner){
-		vector<Vector> newgenes;
-		int mid = Random(lifespan);
-		for (int i=0;i<lifespan;i++){
-			if (i > mid){
-				newgenes.push_back(genes[i]);
-			} else {
-				newgenes.push_back(partner.genes[i]);
-			}
-		}
-		return DNA(newgenes);
-	}
-	
-	void mutations(){
-		for (int i=0;i<lifespan;i++){
-			if (RandomF(1) < 0.01){
-				genes[i] = Vector::random2D()/5;
-			}
+	return DNA(newgenes);
+}
+
+void DNA::mutations(){
+	for (int i=0;i<lifespan;i++){
+		if (RandomF(1) < 0.01){
+			genes[i] = Vector::random2D()/5;
 		}
 	}
-};
+}
