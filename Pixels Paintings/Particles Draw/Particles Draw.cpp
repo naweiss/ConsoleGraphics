@@ -1,4 +1,4 @@
-#include "Particle.cpp"
+#include "Particle.h"
 #include <ctime>
 
 static Image* frog;

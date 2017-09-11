@@ -1,5 +1,5 @@
 #include "DNA.h"
-#include "Math.h"
+#include "Maths.h"
 
 DNA::DNA(){
 	for (int i=0;i<lifespan;i++){

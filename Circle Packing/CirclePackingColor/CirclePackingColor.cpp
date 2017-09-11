@@ -1,7 +1,8 @@
-#include "Graphics.cpp"
-#include "Math.cpp"
+#include "Graphics.h"
+#include "Maths.h"
 #include <vector>
 #include <ctime>
+using namespace std;
 
 class Circle{
 public:

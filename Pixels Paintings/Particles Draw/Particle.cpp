@@ -1,47 +1,36 @@
-#include "Graphics.cpp"
-#include "Math.cpp"
+#include "Particle.h"
+#include "Maths.h"
+#include <cmath>
 
-class Particle{
-public:
-	float x;
-	float y;
+Particle::Particle(Image* frog) {
+	this->frog = frog;
+	x = width/2;
+	y = height/2;
+	float a = Random(PI*2*1000);
+	float speed = Random(1000,4000)/10000.0;
+	vx = cos(a/1000.0)*speed;
+	vy = sin(a/1000.0)*speed;
+}
 
-	float vx;
-	float vy;
-	Image* frog;
+void Particle::display() {
+	COLORREF c = frog->get((int)x,(int)y);
+	fill(c);
+	drawEllipse(x, y, 3, 3);
+}
 
-	Particle() {}
-	
-	Particle(Image* frog) {
-		this->frog = frog;
-		x = width/2;
-		y = height/2;
-		float a = Random(PI*2*1000);
-		float speed = Random(1000,4000)/10000.0;
-		vx = cos(a/1000.0)*speed;
-		vy = sin(a/1000.0)*speed;
+void Particle::move() {
+	x = x + vx;//random(-5, 5);
+	y = y + vy;//random(-5, 5);
+	if (y < 0) {
+		y = height;
+	} 
+	if (y > height) {
+		y = 0;
 	}
-	
-	void display() {
-		COLORREF c = frog->get((int)x,(int)y);
-		fill(c);
-		drawEllipse(x, y, 3, 3);
+	if (x < 0) {
+		x = width;
+	} 
+	if (x > width) {
+		x = 0;
 	}
-	
-	void move() {
-		x = x + vx;//random(-5, 5);
-		y = y + vy;//random(-5, 5);
-		if (y < 0) {
-			y = height;
-		} 
-		if (y > height) {
-			y = 0;
-		}
-		if (x < 0) {
-			x = width;
-		} 
-		if (x > width) {
-			x = 0;
-		}
-	}
-};
+}

@@ -1,5 +1,5 @@
 #include "Population.h"
-#include "Math.h"
+#include "Maths.h"
 
 ofstream myfile;
 

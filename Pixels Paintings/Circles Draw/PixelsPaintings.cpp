@@ -1,5 +1,5 @@
-#include "Graphics.cpp"
-#include "Math.cpp"
+#include "Graphics.h"
+#include "Maths.h"
 
 static Image* img = NULL;
 void setup(){

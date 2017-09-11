@@ -1,7 +1,8 @@
-#include "Graphics.cpp"
-#include "Math.cpp"
+#include "Graphics.h"
+#include "Maths.h"
 #include <vector>
 #include <ctime>
+using namespace std;
 
 class Circle{
 private:
@@ -31,9 +32,9 @@ public:
 	}
 };
 
-static vector<Circle> circles;
-static vector<Point> spots;
-static Image* img = NULL;
+vector<Circle> circles;
+vector<Point> spots;
+Image* img = NULL;
 
 void setup(){
 	srand(time(NULL));

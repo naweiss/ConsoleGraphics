@@ -1,4 +1,4 @@
-#include "Graphics.cpp"
+#include "Graphics.h"
 
 COLORREF color_gray_scale(COLORREF color){
 	//Gray-Scale color: 0.21 R + 0.72 G + 0.07 B.
@@ -21,4 +21,5 @@ void setup(){
 
 void draw(){
 	drawImage(img);
+	noLoop();
 }

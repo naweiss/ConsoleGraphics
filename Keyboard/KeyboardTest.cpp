@@ -1,6 +1,7 @@
-#include "Graphics.cpp"
-#include "Keyboard.cpp"
+#include "Graphics.h"
+#include "Keyboard.h"
 #include <string>
+using namespace std;
 
 static int lvl_y;
 static int lvl_x;
@@ -13,7 +14,7 @@ void setup(){
 }
 
 void draw(){
-	if (GetForegroundWindow() == myconsole){
+	if (isFocused()){
 		int key = keysDown();
 		if (key != -1){
 			fill(rainbowColors(col/1000.0));

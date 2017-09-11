@@ -1,4 +1,5 @@
-#include "Firework.cpp"
+#include "Firework.h"
+#include "Maths.h"
 #include <ctime>
 #include <string>
 

@@ -1,23 +1,20 @@
 @echo off
-REM cd %1
-REM :: Load compilation environment
-REM call "%vs140comntools%vsvars32.bat"
-REM :: Invoke compiler with any options passed to this batch file
-REM :: /Wall for warnings
-REM call cl /EHsc %2 /I C:\Users\nadav\Desktop\SoloProjects\ConsoleGraphics user32.lib gdi32.lib msimg32.lib
-REM set str=%2
-REM call set str=%%str%:cpp=exe%%
-REM pause
-REM :: start the compiled exe
-REM :: Note:start has problem with "" in the first argument
-REM start "" %str%
-
 cd %1
+set home=C:\Users\nadav\Desktop\SoloProjects\ConsoleGraphics
 call "%vs140comntools%vsvars32.bat"
-for /r %1 %%F in (*.cpp) do (
-call cl /c /EHsc %%F
+if %1 == "%home%\Library" (
+	for /r %1 %%F in (*.cpp) do (
+		call cl /c /EHsc "%%F" /FoOBJECT\
+	)
+	pause
+	exit
 )
-for /r %1 %%F in (*.obj) do (call set "list=%%list%% %%F")
+if not exist OBJECT\ mkdir OBJECT
+for /r %1 %%F in (*.cpp) do (
+	call cl /c /EHsc "%%F" /FoOBJECT\ /I "%home%\Library"
+)
+for /r %1\OBJECT\ %%F in (*.obj) do call set "list=%%list%% "%%F""
+for /r "%home%\Library\OBJECT\" %%F in (*.obj) do call set "list=%%list%% "%%F""
 set str=%2
 call set str=%%str%:cpp=exe%%
 link %list% user32.lib gdi32.lib msimg32.lib /OUT:%str%
