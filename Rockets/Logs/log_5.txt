@@ -61,3 +61,12 @@ fitness: 0.597621
 fitness: 0.726836
 fitness: 0.530904
 fitness: 0.798479
+fitness: 0.924207
+fitness: 1.63584
+fitness: 0.942797
+fitness: 1.15465
+fitness: 0.965824
+fitness: 1.31554
+fitness: 0.993695
+fitness: 1.17375
+fitness: 0.884044

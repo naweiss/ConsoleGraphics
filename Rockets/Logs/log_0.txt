@@ -61,3 +61,12 @@ fitness: 9.06645
 fitness: 7.93397
 fitness: 8.09391
 fitness: 8.39145
+fitness: 8.69453
+fitness: 8.01234
+fitness: 9.0776
+fitness: 8.66302
+fitness: 8.10048
+fitness: 8.37924
+fitness: 8.66349
+fitness: 8.31895
+fitness: 8.3247
