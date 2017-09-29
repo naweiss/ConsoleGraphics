@@ -16,14 +16,12 @@ public:
 	double fitness;
 	bool completed;
 	bool crashed;
+	float mutRate;
 	
-	Rocket();
+	Rocket(float mutRate);
 	
 	void applyForce(Vector force);
-	
 	void calaFitness();
-	
 	void update();
-	
 	void show();
 };

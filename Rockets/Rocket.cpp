@@ -1,13 +1,17 @@
 #include "Graphics.h"
 #include "Rocket.h"
+#include <iostream>
+using namespace std;
 
 int n = 0;
 Vector target;
 
-Rocket::Rocket(){
+Rocket::Rocket(float mutRate){
+	this->mutRate = mutRate;
+	dna = DNA(mutRate);
 	completed = false;
 	crashed = false;
-	pos = Vector(width/2,height);
+	pos = Vector(width/4,height/2);
 	vel = Vector();
 	acc = Vector();
 	fitness = 0;
@@ -19,7 +23,7 @@ void Rocket::applyForce(Vector force){
 
 void Rocket::calaFitness(){
 	double d = pos.dist(target);
-	fitness = (width - d)/width;
+	fitness = ((width/2) - d)/(width/2);
 	if (completed)
 		fitness *= 10;
 	if (crashed)
@@ -35,10 +39,10 @@ void Rocket::update(){
 	  crashed = true;
 	}
 
-	if (pos.x > width || pos.x < 0) {
+	if (pos.x > width/2 || pos.x < 0) {
 	  crashed = true;
 	}
-	if (pos.y > height || pos.y < 0) {
+	if (pos.y > height/2 || pos.y < 0) {
 	  crashed = true;
 	}
 	if (!completed && !crashed){
