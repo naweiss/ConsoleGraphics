@@ -80,7 +80,6 @@ void setup(){
 	srand(time(NULL));
 	stroke(RGB(0,0,0));
 	height/=2;
-	background();
 	timer = clock();
 }
 

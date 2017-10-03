@@ -32,12 +32,16 @@ COLORREF GetPixelC(int x,int y){
 }
 
 void SetPixelC(float x,float y){
-	if (do_fill){
-		SetPixelV(bufDC, ROUND(x), ROUND(y),fill_color);
+	COLORREF color = do_fill ? fill_color : stroke_color;
+	if (alpha_val != 255){
+		COLORREF C = GetPixelC(x,y);
+		double a = alpha_val/255.0;
+		BYTE r = GetRValue(color)*a+GetRValue(C)*(1-a);
+		BYTE g = GetGValue(color)*a+GetGValue(C)*(1-a);
+		BYTE b = GetBValue(color)*a+GetBValue(C)*(1-a);
+		color = RGB(r,g,b);
 	}
-	else{
-		SetPixelV(bufDC, ROUND(x), ROUND(y),stroke_color);
-	}
+	SetPixelV(bufDC, ROUND(x), ROUND(y),color);
 }
 
 //Set the fill color of shapes
@@ -234,10 +238,19 @@ void alpha(BYTE alpha){
 
 //Set the background of each frame
 void background(COLORREF bg){
+	HDC tmpDC = NULL;
+	Clone(bufDC, tmpDC);
 	HBRUSH hBrush = CreateSolidBrush(bg);
 	RECT rect = {0,0,width,height};
-	FillRect(bufDC,&rect,hBrush);
+	FillRect(tmpDC,&rect,hBrush);
 	DeleteObject(hBrush);
+	if (alpha_val == 255){
+		BitBlt(bufDC,0,0,width,height,tmpDC,0, 0,SRCCOPY);
+	}else{
+		BLENDFUNCTION blend = {AC_SRC_OVER, 0, alpha_val, 0};
+		AlphaBlend(bufDC, 0, 0, width, height, tmpDC, 0, 0 , width, height, blend);
+	}
+	DeleteDC(tmpDC);
 }
 
 #ifdef DESKTOP_BG_
@@ -330,12 +343,7 @@ void noLoop(){
 
 //Draw the current frame of animation
 void doDraw(){
-	if (alpha_val == 255){
-		BitBlt(mydc,0,0,width,height,bufDC,0, 0,SRCCOPY);
-	}else{
-		BLENDFUNCTION blend = {AC_SRC_OVER, 0, alpha_val, 0};
-		AlphaBlend(mydc, 0, 0, width, height, bufDC, 0, 0 , width, height, blend);
-	}
+	BitBlt(mydc,0,0,width,height,bufDC,0, 0,SRCCOPY);
 	#ifdef DESKTOP_BG_
 	#ifdef OVERLAY_BG_
 	#ifdef OVERLAY_BG_ALPHA
