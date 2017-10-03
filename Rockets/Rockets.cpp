@@ -13,7 +13,7 @@ short groups = 7;
 int gen = 1;
 int sleep_time;
 
-bool dirExists(char* dirName_in){
+bool dirExists(const char* dirName_in){
   DWORD ftyp = GetFileAttributesA(dirName_in);
   if (ftyp == INVALID_FILE_ATTRIBUTES)
     return false;  //something is wrong with your path!

@@ -1,59 +1,54 @@
-#include "Graphics.cpp"
-#include "Math.cpp"
+#include "DNA.h"
 
-const float MUTATION_RATE = 0.02;
+const float MUTATION_RATE = 0.01;
 Image* img;
 
-class DNA{
-public:
-	BYTE* genes;
-	int size;
+DNA::DNA(){
+	this->size = img->width*img->height;
+	genes = new BYTE[size];
+	for(long i=0;i<size;i++){
+		genes[i] = Random(2) == 1 ? 255 : 0;
+	}
+}
 
-	DNA(){
-		size = img->width*img->height;
-		genes = new BYTE[size];
-		for(long i=0;i<size;i++){
+DNA::~DNA(){
+	delete[] genes;
+}
+
+DNA* DNA::crossover(DNA* partner){
+	DNA* new_dna = new DNA;
+	int mid = Random(this->size);
+	for (int i=0;i<this->size;i++){
+		if (i > mid)
+			new_dna->genes[i] = genes[i];
+		else
+			new_dna->genes[i] = partner->genes[i];
+	}
+	return new_dna;
+}
+
+void DNA::mutation(){
+	for (int i=0;i<this->size;i++){
+		if (RandomF(1) < MUTATION_RATE){
 			genes[i] = Random(2) == 1 ? 255 : 0;
 		}
 	}
-	
-	~DNA(){
-		delete[] genes;
+}
+
+double DNA::dist(){
+	double sum = 0;
+	for(long i=0;i<this->size;i++){
+		sum += abs(img->pixels[i*img->Bpp]-genes[i]);
 	}
-	
-	DNA* crossover(DNA* partner){
-		DNA* new_dna = new DNA;
-		for (int i=0;i<size;i++){
-			if (genes[i] == partner->genes[i])
-				new_dna->genes[i] = genes[i];
-			new_dna->genes[i] = Random(2) == 1 ? 255 : 0;
-		}
-		return new_dna;
-	}
-	
-	void mutation(){
-		for (int i=0;i<size;i++){
-			if (RandomF(1) < MUTATION_RATE){
-				genes[i] = Random(2) == 1 ? 255 : 0;
-			}
+	return (sum/255)/size;
+}
+
+void DNA::show(){
+	for(int i=0;i<img->width;i++){
+		for(int j=0;j<img->height;j++){
+			int index = (i*img->width)+j;
+			fill(RGB(genes[index],genes[index],genes[index]));
+			SetPixelC(i,j);
 		}
 	}
-	
-	double dist(){
-		double sum = 0;
-		for(long i=0;i<size;i++){
-			sum += abs(img->pixels[i*img->Bpp]-genes[i]);
-		}
-		return (size - sum/255)/size;
-	}
-	
-	void show(){
-		for(int i=0;i<img->width;i++){
-			for(int j=0;j<img->height;j++){
-				int index = (i*img->width)+j;
-				fill(RGB(genes[index],genes[index],genes[index]));
-				SetPixelC(i,j);
-			}
-		}
-	}
-};
+}

@@ -19,7 +19,7 @@ COLORREF fill_color=RGB(255,255,255);//Color for the fill of shape
 COLORREF stroke_color=RGB(0,0,0);//Color for the stroke of shape
 bool do_fill = true;//Should shape have fill
 bool do_stroke = true;//Should shape have stroke
-BYTE bg_alpha = 0;//The alpha value of the drawn background
+BYTE alpha_val = 255;//The alpha_val value of the drawn background
 
 Point previous;//Previous point in polygon/vertex
 bool first = false;//Did we statred a shape drawing
@@ -32,7 +32,12 @@ COLORREF GetPixelC(int x,int y){
 }
 
 void SetPixelC(float x,float y){
-	SetPixelV(bufDC, ROUND(x), ROUND(y), fill_color);
+	if (do_fill){
+		SetPixelV(bufDC, ROUND(x), ROUND(y),fill_color);
+	}
+	else{
+		SetPixelV(bufDC, ROUND(x), ROUND(y),stroke_color);
+	}
 }
 
 //Set the fill color of shapes
@@ -59,41 +64,21 @@ void noStroke(){
 
 //Draw line form (x0,y0) to (x1,y1)
 void drawLine(int x0, int y0, int x1, int y1){
+	int dx = x1 - x0, dy = y1 - y0, steps, k;
+	float xIncrement, yIncrement, x = x0, y = y0;
+	
+	if(abs(dx) > abs(dy)) steps = abs(dx);
+	else steps = abs(dy);
 
-   int dx = x1 - x0, dy = y1 - y0, steps, k;
+	xIncrement = dx / (float) steps;
+	yIncrement = dy / (float) steps;
+	SetPixelC(x,y);
 
-   float xIncrement, yIncrement, x = x0, y = y0;
-
-   if(abs(dx) > abs(dy)) steps = abs(dx);
-
-   else steps = abs(dy);
-
-   xIncrement = dx / (float) steps;
-
-   yIncrement = dy / (float) steps;
-
-   if (do_fill){
-	   SetPixelV(bufDC, ROUND(x), ROUND(y),fill_color);
-   }
-   else{
-		SetPixelV(bufDC, ROUND(x), ROUND(y),stroke_color);
-   }
-
-   for(int k = 0; k < steps; k++){
-
-    x += xIncrement;
-
-    y += yIncrement;
-
-	if (do_fill){
-		SetPixelV(bufDC, x, y, fill_color);
+	for(int k = 0; k < steps; k++){
+		x += xIncrement;
+		y += yIncrement;
+		SetPixelC(x,y);
 	}
-	else{
-		SetPixelV(bufDC, x, y, stroke_color);
-	}
-
- }
-
 }
 
 //Draw rectangle with left-top corner in (x0,y0) and width=w and height=h
@@ -101,7 +86,7 @@ void drawRectangle(int x, int y, int w, int h){
 	if (do_fill){
 		for(int i = x; i <= x+w; i ++){
 			for(int j = y; j <= y+h; j ++){
-				SetPixelV(bufDC, i, j, fill_color);
+				SetPixelC(i,j);
 			}
 		}
 	}
@@ -123,12 +108,10 @@ void doEllipse(int xc, int yc, int x, int y){
 		drawLine(xc+x, yc-y, xc-x, yc-y);
 	}
 	else{
-		/*This function plots a pixel at coordinates(x,y) specified by first 2 arguments and third argument specifies the color of the pixel*/
-		SetPixelV(bufDC, xc+x, yc+y, stroke_color);
-		SetPixelV(bufDC, xc-x, yc+y, stroke_color);
-		
-		SetPixelV(bufDC, xc+x, yc-y, stroke_color);
-		SetPixelV(bufDC, xc-x, yc-y, stroke_color);
+		SetPixelC(xc+x, yc+y);
+		SetPixelC(xc-x, yc+y);
+		SetPixelC(xc+x, yc-y);
+		SetPixelC(xc-x, yc-y);
 	}
 }
 
@@ -246,7 +229,7 @@ void vertex(Point p){
 }
 
 void alpha(BYTE alpha){
-	bg_alpha = alpha;	
+	alpha_val = alpha;
 }
 
 //Set the background of each frame
@@ -319,7 +302,6 @@ void InitCanvas(){
 			BitBlt(backupDC, 0, 0, width, height, mydc, 0, 0, SRCCOPY);
 			#endif
 			Clone(mydc, bufDC);
-			background();
 		}
 		else{
 			cout << "Error: device context not found" << endl;
@@ -348,10 +330,10 @@ void noLoop(){
 
 //Draw the current frame of animation
 void doDraw(){
-	if (bg_alpha == 0){
+	if (alpha_val == 255){
 		BitBlt(mydc,0,0,width,height,bufDC,0, 0,SRCCOPY);
 	}else{
-		BLENDFUNCTION blend = {AC_SRC_OVER, 0, bg_alpha, 0};
+		BLENDFUNCTION blend = {AC_SRC_OVER, 0, alpha_val, 0};
 		AlphaBlend(mydc, 0, 0, width, height, bufDC, 0, 0 , width, height, blend);
 	}
 	#ifdef DESKTOP_BG_

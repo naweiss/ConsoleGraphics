@@ -1,47 +1,24 @@
-#include "DNA.cpp"
-#include <vector>
+#include "Pic.h"
 
-double color_dist(COLORREF color1,COLORREF color2){
-	double r = abs(GetRValue(color1)-GetRValue(color2));
-	double g = abs(GetGValue(color1)-GetGValue(color2));
-	double b = abs(GetBValue(color1)-GetBValue(color2));
-	return (r + g + b)/3/255;
+Pic::Pic(){
+	dna = new DNA;
+	fitness = 0;
 }
 
-class Pic{
-public:
-	DNA* dna;
-	double fitness;
-	
-	Pic(){
-		dna = new DNA;
-		fitness = 0;
-	}
-	
-	Pic(DNA* new_dna){
-		fitness = 0;
-		dna = new_dna;
-	}
-	
-	~Pic(){
-		delete dna;
-	}
-	
-	void calaFitness(){
-		Image* canvas = GetCanvas(img->width,img->height);
-		double sum = 0;
-		for (int i=0;i<img->width;i++){
-			for (int j=0;j<img->height;j++){
-				sum += color_dist(canvas->get(i,j),img->get(i,j));
-			}
-		}
-		delete canvas;
-		sum /= img->width*img->height;
-		fitness = 1-sum;
-	}
-	
-	void show(){
-		background();
-		dna->show();
-	}
-};
+Pic::Pic(DNA* new_dna){
+	fitness = 0;
+	dna = new_dna;
+}
+
+Pic::~Pic(){
+	delete dna;
+}
+
+void Pic::calaFitness(){
+	fitness = 1-dna->calaFitness();
+}
+
+void Pic::show(){
+	background();
+	dna->show();
+}

@@ -112,7 +112,7 @@ void beginShape();
 //Add point to the shape/polygon
 void vertex(Point p);
 
-void alpha(BYTE alpha = 0);
+void alpha(BYTE alpha_val = 255);
 
 //Set the background of each frame
 void background(COLORREF bg = RGB(0,0,0));

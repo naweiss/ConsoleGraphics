@@ -8,19 +8,6 @@ DNA::DNA(float mutRate){
 	}
 }
 
-// DNA::DNA(const DNA& obj){
-	// for (int i=0;i<lifespan;i++){
-		// genes.push_back(new Vector(*(obj.genes[i])));
-	// }
-	// this->mutRate = obj.mutRate;
-// }
-
-// DNA::~DNA(){
-	// for (int i=0;i<lifespan;i++){
-		// delete genes[i];
-	// }
-// }
-
 DNA::DNA(vector<Vector> newgenes,float mutRate){
 	for (int i=0;i<lifespan;i++){
 		genes.push_back(newgenes[i]);

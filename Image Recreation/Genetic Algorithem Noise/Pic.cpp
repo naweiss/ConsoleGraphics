@@ -1,31 +1,24 @@
-#include "DNA.cpp"
-#include <vector>
+#include "Pic.h"
 
-class Pic{
-public:
-	DNA* dna;
-	double fitness;
-	
-	Pic(){
-		dna = new DNA;
-		fitness = 0;
-	}
-	
-	Pic(DNA* new_dna){
-		fitness = 0;
-		dna = new_dna;
-	}
-	
-	~Pic(){
-		delete dna;
-	}
-	
-	void calaFitness(){
-		fitness = dna->dist();
-	}
-	
-	void show(){
-		background();
-		dna->show();
-	}
-};
+Pic::Pic(){
+	dna = new DNA;
+	fitness = 0;
+}
+
+Pic::Pic(DNA* new_dna){
+	fitness = 0;
+	dna = new_dna;
+}
+
+Pic::~Pic(){
+	delete dna;
+}
+
+void Pic::calaFitness(){
+	fitness = 1 - dna->dist();
+}
+
+void Pic::show(){
+	background();
+	dna->show();
+}
