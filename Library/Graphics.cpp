@@ -11,7 +11,7 @@ HWND myconsole = NULL;//A console handle
 HDC mydc = NULL;//A handle to device context (screen)
 HDC bufDC = NULL;//The current frame
 
-#ifdef DESKTOP_BG_
+#ifdef DESKTOP_BG
 HDC backupDC = NULL;//The original background
 #endif
 
@@ -240,10 +240,15 @@ void alpha(BYTE alpha){
 void background(COLORREF bg){
 	HDC tmpDC = NULL;
 	Clone(bufDC, tmpDC);
+	#ifdef DESKTOP_BG
+	BitBlt(tmpDC, 0, 0, width, height, backupDC, 0, 0, SRCCOPY);
+	#endif
+	#ifndef DESKTOP_BG
 	HBRUSH hBrush = CreateSolidBrush(bg);
 	RECT rect = {0,0,width,height};
 	FillRect(tmpDC,&rect,hBrush);
 	DeleteObject(hBrush);
+	#endif
 	if (alpha_val == 255){
 		BitBlt(bufDC,0,0,width,height,tmpDC,0, 0,SRCCOPY);
 	}else{
@@ -253,7 +258,7 @@ void background(COLORREF bg){
 	DeleteDC(tmpDC);
 }
 
-#ifdef DESKTOP_BG_
+#ifdef DESKTOP_BG
 //Funtion to find child of the hwnd (find the desktop handle)
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam){
 	HWND p = FindWindowEx(hwnd, NULL,"SHELLDLL_DefView", NULL);
@@ -298,7 +303,7 @@ void Clone(HDC& src, HDC& dst){
 
 //Create all the handles for the animation
 void InitCanvas(){
-	#ifdef DESKTOP_BG_
+	#ifdef DESKTOP_BG
 	findDesktopBackGround(); 
 	#else
 	myconsole = GetConsoleWindow();
@@ -310,13 +315,13 @@ void InitCanvas(){
 		{
 			width = GetDeviceCaps(mydc,HORZRES);
 			height = GetDeviceCaps(mydc,VERTRES);
-			#ifdef DESKTOP_BG_
+			Clone(mydc, bufDC);
+			BitBlt(bufDC, 0, 0, width, height, mydc, 0, 0, SRCCOPY);
+			#ifdef DESKTOP_BG
 			Clone(mydc, backupDC);
 			BitBlt(backupDC, 0, 0, width, height, mydc, 0, 0, SRCCOPY);
 			#endif
-			Clone(mydc, bufDC);
-		}
-		else{
+		} else{
 			cout << "Error: device context not found" << endl;
 		}
 		
@@ -344,18 +349,6 @@ void noLoop(){
 //Draw the current frame of animation
 void doDraw(){
 	BitBlt(mydc,0,0,width,height,bufDC,0, 0,SRCCOPY);
-	#ifdef DESKTOP_BG_
-	#ifdef OVERLAY_BG_
-	#ifdef OVERLAY_BG_ALPHA
-	BLENDFUNCTION blend = {AC_SRC_OVER, 0, OVERLAY_BG_ALPHA, 0};
-	AlphaBlend(mydc,0,0,width,height,backupDC,0, 0,width,height, blend);
-	#endif
-	#ifndef OVERLAY_BG_ALPHA
-	BLENDFUNCTION blend = {AC_SRC_OVER, 0, 100, 0};
-	AlphaBlend(mydc,0,0,width,height,backupDC,0, 0,width,height,
-	#endif
-	#endif
-	#endif
 }
 
 Image* loadImage(const char *name){
@@ -479,7 +472,7 @@ bool getLoop(){
 void Finish(){
 	ReleaseDC(myconsole, mydc);
 	ReleaseDC(myconsole, bufDC);
-	#ifdef DESKTOP_BG_
+	#ifdef DESKTOP_BG
 	ReleaseDC(myconsole, backupDC);
 	#endif
 	cin.ignore();

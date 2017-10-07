@@ -1,8 +1,6 @@
 #include <Windows.h>
 
-//#define DESKTOP_BG_ //Console window as desktop background
-//#define OVERLAY_BG_ //Console window shold merge with existing background
-//#define OVERLAY_BG_ALPHA 50
+// #define DESKTOP_BG //Console window as desktop background
 
 extern int width;//Width of the canvas/screen
 extern int height;//Height of the canvas/screen

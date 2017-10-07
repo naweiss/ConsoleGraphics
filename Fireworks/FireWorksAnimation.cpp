@@ -79,14 +79,14 @@ clock_t timer;
 void setup(){
 	srand(time(NULL));
 	stroke(RGB(0,0,0));
-	height/=2;
 	timer = clock();
+	alpha(30);
 }
 
 void draw(){
+	Sleep(10);
 	background();
-	alpha(30);
-	if (RandomF(1) < 0.03){
+	if (RandomF(1) < 0.05){
 		fireworks.push_back(new Firework(HSVToRGB(RandomF(360),1,1)));
 	}
 	for (vector<Firework*>::iterator it = fireworks.begin() ; it != fireworks.end();){
@@ -100,7 +100,6 @@ void draw(){
 		}
 	}
 	fill();
-	string passed = to_string(frameCount/((float)(clock() - timer)/CLOCKS_PER_SEC));
+	string passed = to_string((int)(frameCount/((float)(clock() - timer)/CLOCKS_PER_SEC)));
 	drawText(0,0,passed.c_str(),passed.length());
-	Sleep(10);
 }

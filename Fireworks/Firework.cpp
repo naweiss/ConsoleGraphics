@@ -4,7 +4,7 @@
 Vector* Firework::gravity = new Vector(0,0.2);
 
 Firework::Firework(COLORREF color){
-	firework = new Particle(Random(width/2),height,color);
+	firework = new Particle(Random(width),height,color);
 	this->lifespan = 150;
 	this->color = color;
 }

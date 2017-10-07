@@ -24,7 +24,6 @@ public:
 		if (frameCount%switchInterval == 0){
 			if (charType > 1) {
 				value[0]= 0x30A0+Random(96);
-				
 			}
 			else{
 				value[0] = '0'+Random(0,10);
@@ -49,7 +48,7 @@ public:
 	}
 };
 
-static int symbolSize = 14;
+static int symbolSize = 15;
 
 class Stream{
 private:
@@ -92,6 +91,9 @@ static Stream** streams;
 
 void setup(){
 	srand (time(NULL));
+	textSize(symbolSize);
+	alpha(100);
+	
 	streams = new Stream*[width/symbolSize];
 	int x =0;
 	for (int i=0;i <= width/symbolSize; i++)
@@ -100,12 +102,10 @@ void setup(){
 		streams[i]->generateSymbols(x, -Random(0,1000));
 		x += symbolSize;
 	}
-	textSize(symbolSize);
 }
 
 void draw(){
 	background();
-	alpha(150);
 	for (int i=0;i <= width/symbolSize; i++)
 	{
 		streams[i]->render();

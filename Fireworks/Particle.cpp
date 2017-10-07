@@ -6,7 +6,7 @@ Particle::Particle(float x, float y, COLORREF color, bool firework){
 	this->color = color;
 	pos = new Vector(x,y);
 	if (firework){
-		float ran = RandomF(8,13);
+		float ran = RandomF(8,15);
 		vel = new Vector(0,-ran);
 	} else {
 		vel = new Vector(Vector::random2D());
@@ -36,5 +36,5 @@ void Particle::update(){
 
 void Particle::show(){
 	fill(color);
-	drawCircle(pos->x,pos->y,3);
+	drawCircle(pos->x,pos->y,1);
 }
