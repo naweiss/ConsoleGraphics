@@ -94,11 +94,14 @@ void drawEllipse(int x0, int y0, int rx, int ry);
 //Draw Ellipse with center in (x0,y0) and radius=r
 void drawCircle(int x0, int y0, int r);
 
+Point getTextSize(const char* txt, int len);
+Point getTextSize(const wchar_t* txt, int len);
+
 //Draw unicode text of length = len, in (x,y) 
-void drawText(int x0, int y0,wchar_t* txt, int len);
+Point drawText(int x0, int y0,const wchar_t* txt, int len);
 
 //Draw ascii text of length = len, in (x,y) 
-void drawText(int x0, int y0,const char* txt, int len);
+Point drawText(int x0, int y0,const char* txt, int len);
 
 //Set the text size in pixels for text drawings 
 void textSize(int size);

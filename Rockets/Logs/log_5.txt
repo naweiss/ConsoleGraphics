@@ -1,2 +1,5 @@
 mutation rate: 1.8%
-fitness: 0.0515296
+fitness: 0.0656054
+fitness: 0.0990869
+fitness: 0.101212
+fitness: 0.18667

@@ -38,9 +38,9 @@ void DNA::mutation(){
 double DNA::dist(){
 	double sum = 0;
 	for(long i=0;i<this->size;i++){
-		sum += abs(img->pixels[i*img->Bpp]-genes[i]);
+		sum += abs(img->pixels[i*img->Bpp]-genes[i])/255;
 	}
-	return (sum/255)/size;
+	return sum/this->size;
 }
 
 void DNA::show(){

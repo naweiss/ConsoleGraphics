@@ -5,7 +5,7 @@ Image* img;
 
 Circle::Circle(){
 	p = Vector(Random(img->width),Random(img->height));
-	r = Random(min(img->width/4,img->height/4));
+	r = Random(1,15);
 	int num = Random(256);
 	color = RGB(num,num,num);
 }

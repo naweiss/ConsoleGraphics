@@ -1,6 +1,5 @@
 #include "Graphics.h"
 
-
 void setup(){}
 
 void draw(){

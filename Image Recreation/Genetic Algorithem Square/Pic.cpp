@@ -15,7 +15,7 @@ Pic::~Pic(){
 }
 
 void Pic::calaFitness(){
-	fitness = 1-dna->calaFitness();
+	fitness = pow(1-dna->calaFitness(),2);
 }
 
 void Pic::show(){

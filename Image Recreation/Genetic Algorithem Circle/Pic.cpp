@@ -20,5 +20,7 @@ void Pic::calaFitness(){
 
 void Pic::show(){
 	background();
+	alpha(200);
 	dna->show();
+	alpha(255);
 }

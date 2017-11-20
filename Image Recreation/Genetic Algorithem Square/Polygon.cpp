@@ -4,7 +4,7 @@
 #include <string>
 
 Population* pop;
-const char* file_name = "halfs";
+const char* file_name = "halfs4";
 
 bool dirExists(const char* dirName_in){
   DWORD ftyp = GetFileAttributesA(dirName_in);

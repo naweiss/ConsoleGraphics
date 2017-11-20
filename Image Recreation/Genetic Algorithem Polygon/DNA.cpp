@@ -5,10 +5,10 @@ const int AMOUNT = 30;
 const float MUTATION_RATE = 0.02;
 
 double color_dist(COLORREF color1,COLORREF color2){
-	double r = abs(GetRValue(color1)-GetRValue(color2));
-	double g = abs(GetGValue(color1)-GetGValue(color2));
-	double b = abs(GetBValue(color1)-GetBValue(color2));
-	return (r + g + b)/3/255;
+	double r = pow((GetRValue(color1)-GetRValue(color2))/255.0,2);
+	double g = pow((GetGValue(color1)-GetGValue(color2))/255.0,2);
+	double b = pow((GetBValue(color1)-GetBValue(color2))/255.0,2);
+	return sqrt((r + g + b)/3);
 }
 
 DNA::DNA(){

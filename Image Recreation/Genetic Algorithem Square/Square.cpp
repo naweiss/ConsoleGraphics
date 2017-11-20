@@ -4,9 +4,9 @@
 Image* img;
 
 Square::Square(){
-	p = Vector::random2D()*RandomF(img->width);
-	w = Random(img->width);
-	h = Random(img->height);
+	p = Vector(img->width/2,img->height/2)+Vector::random2D()*RandomF(img->width/2+10);
+	w = Random(10);
+	h = Random(10);
 	if (p.x < 0)
 		p.x = 0;
 	if (p.y < 0)
@@ -15,7 +15,7 @@ Square::Square(){
 		w = img->width-p.x;
 	if (h+p.y > img->height)
 		h = img->height-p.y;
-	int num = Random(2) == 1 ? 255 : 0;
+	int num = 255;
 	color = RGB(num,num,num);
 }
 

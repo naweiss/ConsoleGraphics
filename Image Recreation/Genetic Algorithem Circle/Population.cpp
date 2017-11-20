@@ -3,7 +3,7 @@
 #include <string>
 #include <iomanip>
 
-const int POP_SIZE = 50;
+const int POP_SIZE = 300;
 double bestFitness = 0;
 ofstream myfile;
 Image* bestImg;

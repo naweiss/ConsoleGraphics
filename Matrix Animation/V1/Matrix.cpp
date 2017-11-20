@@ -48,7 +48,7 @@ public:
 	}
 };
 
-static int symbolSize = 15;
+int symbolSize = 15;
 
 class Stream{
 private:

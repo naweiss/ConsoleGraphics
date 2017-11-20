@@ -21,6 +21,7 @@ bool do_fill = true;//Should shape have fill
 bool do_stroke = true;//Should shape have stroke
 BYTE alpha_val = 255;//The alpha_val value of the drawn background
 
+int prevH = -1;
 Point previous;//Previous point in polygon/vertex
 bool first = false;//Did we statred a shape drawing
 bool loop = true;//Should the draw function be in loop
@@ -31,6 +32,7 @@ COLORREF GetPixelC(int x,int y){
 	return GetPixel(bufDC,x,y);
 }
 
+//set pixel color at given point on the canvas/screen
 void SetPixelC(float x,float y){
 	COLORREF color = do_fill ? fill_color : stroke_color;
 	if (alpha_val != 255){
@@ -68,12 +70,10 @@ void noStroke(){
 
 //Draw line form (x0,y0) to (x1,y1)
 void drawLine(int x0, int y0, int x1, int y1){
-	int dx = x1 - x0, dy = y1 - y0, steps, k;
+	int dx = x1 - x0, dy = y1 - y0, steps;
 	float xIncrement, yIncrement, x = x0, y = y0;
 	
-	if(abs(dx) > abs(dy)) steps = abs(dx);
-	else steps = abs(dy);
-
+	steps = max(abs(dx), abs(dy));
 	xIncrement = dx / (float) steps;
 	yIncrement = dy / (float) steps;
 	SetPixelC(x,y);
@@ -108,20 +108,31 @@ void drawRectangle(int x, int y, int w, int h){
 //Draw pixels section in ellipse
 void doEllipse(int xc, int yc, int x, int y){
 	if (do_fill){
-		drawLine(xc+x, yc+y, xc-x, yc+y);
-		drawLine(xc+x, yc-y, xc-x, yc-y);
+		if (prevH != yc+y){
+			drawLine(xc+x, yc+y, xc-x, yc+y);
+			if (y != 0){
+				drawLine(xc+x, yc-y, xc-x, yc-y);
+			}
+		}
+		prevH = yc+y;
 	}
 	else{
 		SetPixelC(xc+x, yc+y);
-		SetPixelC(xc-x, yc+y);
-		SetPixelC(xc+x, yc-y);
-		SetPixelC(xc-x, yc-y);
+		if(y != 0)
+			SetPixelC(xc+x, yc-y);
+		if(x != 0){
+			SetPixelC(xc-x, yc+y);
+			if (y != 0)
+				SetPixelC(xc-x, yc-y);
+		}
 	}
 }
 
 //Draw ellipse in (x,y) with constants a=rx and b=ry
 void _drawEllipse(int x0, int y0, int rx, int ry){
-    int rxSq = rx * rx;
+    prevH = -1;
+	
+	int rxSq = rx * rx;
     int rySq = ry * ry;
     int x = 0, y = ry;
 	float p;
@@ -182,30 +193,47 @@ void drawCircle(int x0, int y0, int r){
 	drawEllipse(x0,y0,r,r);
 }
 
+Point getTextSize(const char* txt, int len){
+	SIZE size;
+	GetTextExtentPoint32A(bufDC, txt, len, &size);
+	return Point(size.cx,size.cy);
+}
+
+Point getTextSize(const wchar_t* txt, int len){
+	SIZE size;
+	GetTextExtentPoint32W(bufDC, txt, len, &size);
+	return Point(size.cx,size.cy);
+}
+
 //Draw unicode text of length = len, in (x,y) 
-void drawText(int x0, int y0,wchar_t* txt, int len){
+Point drawText(int x0, int y0,const wchar_t* txt, int len){
 	if (do_fill)
 		SetTextColor(bufDC,fill_color);
 	else
 		SetTextColor(bufDC,stroke_color);
 	SetBkMode(bufDC,TRANSPARENT);
-	TextOutW(bufDC, x0, y0, txt,len);
+	Point size = getTextSize(txt,len);
+	RECT rect = { x0, y0, x0+(int)size.x, y0+(int)size.y };
+	ExtTextOutW(bufDC, x0, y0, NULL, &rect, txt, len, NULL);
 	SetBkMode(bufDC,OPAQUE);
+	return size;
 }
 
 //Draw ascii text of length = len, in (x,y) 
-void drawText(int x0, int y0,const char* txt, int len){
-	if (do_fill)
-		SetTextColor(bufDC,fill_color);
-	else
-		SetTextColor(bufDC,stroke_color);
+Point drawText(int x0, int y0,const char* txt, int len){
+	COLORREF color = do_fill ? fill_color : stroke_color;
+	SetTextColor(bufDC,fill_color);
 	SetBkMode(bufDC,TRANSPARENT);
-	TextOutA(bufDC, x0, y0, txt,len);
+	Point size = getTextSize(txt,len);
+	RECT rect = { x0, y0, x0+(int)size.x, y0+(int)size.y };
+	ExtTextOutA(bufDC, x0, y0, NULL, &rect, txt, len, NULL);
 	SetBkMode(bufDC,OPAQUE);
+	return size;
 }
 
 //Set the text size in pixels for text drawings 
 void textSize(int size){
+	// HFONT hFont = (HFONT)GetCurrentObject(bufDC,OBJ_FONT);
 	HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 	LOGFONT logfont;
 	GetObject(hFont, sizeof(LOGFONT), &logfont);
