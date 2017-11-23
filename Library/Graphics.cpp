@@ -461,7 +461,7 @@ bool drawImage(Image* img, int x, int y){
 	return success;
 }
 
-bool SaveBMP(Image* img, LPCTSTR bmpfile){
+bool SaveBMP(Image* img, const char* bmpfile){
 	bool success = false;
 	long BufferSize = (img->width*img->height)*img->Bpp;
 	BITMAPFILEHEADER bmfh = {};
@@ -474,7 +474,7 @@ bool SaveBMP(Image* img, LPCTSTR bmpfile){
 	info.biPlanes = 1;	
 	info.biBitCount = 8*(img->Bpp);
 	info.biCompression = BI_RGB; 
-	HANDLE file = CreateFile(bmpfile, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE file = CreateFileA(bmpfile, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(NULL != file){
 		unsigned long bwritten;
 		if(TRUE == WriteFile(file, &bmfh, sizeof(BITMAPFILEHEADER), &bwritten, NULL)){	
