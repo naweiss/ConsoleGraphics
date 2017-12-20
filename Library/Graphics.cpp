@@ -27,6 +27,27 @@ bool first = false;//Did we statred a shape drawing
 bool loop = true;//Should the draw function be in loop
 long long frameCount = 1;//The number of frames from the bigining of the animation
 
+
+Image::Image(int width, int height, short Bpp){
+    this->width = width;
+    this->height = height;
+    this->Bpp = Bpp;
+    // ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
+    this->pixels = new char[real_width()*height];
+}
+
+int Image::real_width(){
+   return ((Bpp*width+3) & ~3);
+}
+
+int Image::index(short x, short y){
+   return ((Bpp*width+3) & ~3)*(height-1-y)+x*Bpp;
+}
+
+Image::~Image(){
+    if (this->pixels)
+        delete[] this->pixels;
+}
 //get pixel color from canvas/screen
 COLORREF GetPixelC(int x,int y){
 	return GetPixel(bufDC,x,y);
@@ -391,13 +412,15 @@ Image* loadImage(const char *name){
 				info.bmiHeader.biSize = sizeof(info.bmiHeader);
 				if(NULL != GetDIBits(hCompDC, hBMP, 0, 0, NULL, &info, DIB_RGB_COLORS)){
 					info.bmiHeader.biHeight = abs(info.bmiHeader.biHeight);
-					img = new Image(info.bmiHeader.biWidth, info.bmiHeader.biHeight,info.bmiHeader.biBitCount/8);
+					img = new Image(info.bmiHeader.biWidth,
+                        info.bmiHeader.biHeight,
+                        info.bmiHeader.biBitCount/8);
 					GetDIBits(hCompDC, hBMP, 0, info.bmiHeader.biHeight, img->pixels, &info, DIB_RGB_COLORS);
 				}
 			}
 			DeleteObject(hBMP);
 		}
-		DeleteDC(hCompDC);
+        DeleteDC(hCompDC);
 	}
 	return img;
 }
@@ -416,13 +439,13 @@ Image* GetCanvas(int x2, int y2, int x, int y){
 		if (NULL != hBmp){
 			if (NULL != SelectObject(hCompDC, hBmp)){
 				if (NULL != BitBlt(hCompDC, 0, 0, x2, y2, bufDC, x, y, SRCCOPY)){
-					img = new Image(x2, y2,4);
+					img = new Image(x2, y2,3);
 					BITMAPINFO info = {0};
 					info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 					info.bmiHeader.biWidth = x2;
 					info.bmiHeader.biHeight = y2;
 					info.bmiHeader.biPlanes = 1;	
-					info.bmiHeader.biBitCount = 32;
+					info.bmiHeader.biBitCount = 24;
 					info.bmiHeader.biCompression = BI_RGB; 
 					GetDIBits(hCompDC, hBmp, 0, y2, img->pixels, &info, DIB_RGB_COLORS);
 				}
@@ -435,7 +458,7 @@ Image* GetCanvas(int x2, int y2, int x, int y){
 }
 
 bool drawImage(Image* img, int x, int y){
-	bool success = false;
+    bool success = false;
 	HDC hCompDC = CreateCompatibleDC(bufDC);
 	if (NULL != hCompDC){
 		HBITMAP hBmp = CreateCompatibleBitmap(bufDC, img->width, img->height);
@@ -447,7 +470,7 @@ bool drawImage(Image* img, int x, int y){
 			info.bmiHeader.biPlanes = 1;	
 			info.bmiHeader.biBitCount = 8*(img->Bpp);
 			info.bmiHeader.biCompression = BI_RGB; 
-			if (NULL != SetDIBits(hCompDC, hBmp, 0, img->height, img->pixels, &info, DIB_RGB_COLORS)){
+			if (NULL != SetDIBits(hCompDC, hBmp, 0, img->height, img->pixels, &info, DIB_PAL_COLORS)){//DIB_RGB_COLORS)){
 				if (NULL != SelectObject(hCompDC, hBmp)){
 					if (NULL != BitBlt(bufDC, x, y, img->width, img->height, hCompDC, 0, 0, SRCCOPY)){
 						success = true;
@@ -471,7 +494,7 @@ bool SaveBMP(Image* img, const char* bmpfile){
 	info.biSize = sizeof(BITMAPINFOHEADER);
 	info.biWidth = img->width;
 	info.biHeight = img->height;
-	info.biPlanes = 1;	
+	info.biPlanes = 1;
 	info.biBitCount = 8*(img->Bpp);
 	info.biCompression = BI_RGB; 
 	HANDLE file = CreateFileA(bmpfile, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);

@@ -1,6 +1,6 @@
 #include <Windows.h>
 
-// #define DESKTOP_BG //Console window as desktop background
+#define DESKTOP_BG //Console window as desktop background
 
 extern int width;//Width of the canvas/screen
 extern int height;//Height of the canvas/screen
@@ -21,42 +21,48 @@ struct Point{
 struct Image{
 	int width;
 	int height;
-	int Bpp;
-	BYTE* pixels;
+	short Bpp;
+	char* pixels;
 	
-	Image(int width, int height, int Bpp) {
-		this->width = width;
-		this->height = height;
-		this->Bpp = Bpp;
-		// ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
-		this->pixels = new BYTE[((Bpp*width+3) & ~3)*height];
+	Image(int width, int height, short Bpp);
+	int real_width();
+	int index(short i, short j);
+	
+    COLORREF get(int idx){
+        if(idx >= 0 && idx < real_width()*width){
+            if (this->Bpp >= 3)
+                return RGB(this->pixels[idx+2],this->pixels[idx+1],this->pixels[idx]);
+            return RGB(this->pixels[idx],this->pixels[idx],this->pixels[idx]);
+        }
+        return NULL;
+    }
+    
+	COLORREF get(short x,short y){
+        if (x < this->width && y < this->height){
+            // ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
+            return get(index(x,y));
+        }
+        return NULL;
 	}
-	
-	COLORREF get(int x,int y){
-		if (x < this->width && y < this->height){
-			// ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
-			int index = (this->height-1-y)*((this->width*this->Bpp+3)& ~3)+x*this->Bpp;
-			
-			return RGB(this->pixels[index+2],this->pixels[index+1],this->pixels[index]);
-		}
-		return NULL;
-	}
-	
-	void set(int x,int y, COLORREF color){
+    
+    void set(int idx, COLORREF color){
+        if(idx >= 0 && idx < real_width()*width){
+            if (this->Bpp >= 3){
+                this->pixels[idx+2] = GetRValue(color);
+                this->pixels[idx+1] = GetGValue(color);
+            }
+            this->pixels[idx] = GetBValue(color);
+        }
+    }
+    
+	void set(short x,short y, COLORREF color){
 		if (x >=0 && y >= 0 && x < this->width && y < this->height){
 			// ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
-			int index = (this->height-1-y)*((this->width*this->Bpp+3)& ~3)+x*this->Bpp;
-			
-			this->pixels[index+2] = GetRValue(color);
-			this->pixels[index+1] = GetGValue(color);
-			this->pixels[index]   = GetBValue(color);
+			set(index(x,y), color);	
 		}
 	}
 	
-	~Image() {
-		if (this->pixels)
-			delete[] this->pixels;
-    }
+	~Image();
 };
 
 //get pixel color from canvas/screen
