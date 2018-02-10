@@ -1,6 +1,20 @@
 @echo off
 REM Cd to the code directory given in first argument
 cd %1
+REM If main file (second argument) given check it exists
+if not exist %2 (
+	echo usage:
+	echo    compile.bat  ^<code_directory^> [^<main_file_name^>]
+	echo.
+	echo example:
+	echo     - compile the library itself:
+	echo         .\compile.bat .\Library\
+	echo.
+	echo     - compile user code:
+	echo         .\compile.bat .\SomeCodeDir\ main.cpp
+	echo.
+	exit
+)
 REM Convert potentialy relative path to absolute path
 set current=%cd%
 REM Find this bat file parent folder
@@ -20,11 +34,6 @@ if "%current%" == "%library%" (
 	pause
 	exit
 )
-if not exist %2 (
-	echo [!] Main file invalid
-	pause
-	exit
-)
 REM Create obj files
 for /r "%current%" %%F in (*.cpp) do (
 	call cl /c /EHsc "%%F" /FoOBJECT\ /I "%library%"
@@ -36,7 +45,7 @@ for /r "%current%\OBJECT\" %%F in (*.obj) do (
 for /r "%library%\OBJECT\" %%F in (*.obj) do (
 	call set "list=%%list%% "%%F""
 )
-REM Choose name for exe file based on main file (second argumnet)
+REM Choose name for exe file based on main file (second argument)
 set str=%2
 call set str=%%str%:cpp=exe%%
 REM Link all the obj file to an exe file
