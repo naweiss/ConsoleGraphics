@@ -1,4 +1,5 @@
 #include "Maths.h"
+// #define POOL_SIZE 174
 #define POOL_SIZE 2
 
 class CharPool{

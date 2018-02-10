@@ -1,10 +1,10 @@
 #include <Windows.h>
 
-#define DESKTOP_BG //Console window as desktop background
+// #define DESKTOP_BG //Console window as desktop background
 
 extern int width;//Width of the canvas/screen
 extern int height;//Height of the canvas/screen
-extern long long frameCount ;//The number of frames from the bigining of the animation
+extern long long frameCount;//The number of frames from the bigining of the animation
 
 //Struct for point in 2d
 struct Point{
@@ -23,44 +23,18 @@ struct Image{
 	int height;
 	short Bpp;
 	char* pixels;
+    // HDC* hDc = NULL;
 	
 	Image(int width, int height, short Bpp);
 	int real_width();
 	int index(short i, short j);
 	
-    COLORREF get(int idx){
-        if(idx >= 0 && idx < real_width()*width){
-            if (this->Bpp >= 3)
-                return RGB(this->pixels[idx+2],this->pixels[idx+1],this->pixels[idx]);
-            return RGB(this->pixels[idx],this->pixels[idx],this->pixels[idx]);
-        }
-        return NULL;
-    }
-    
-	COLORREF get(short x,short y){
-        if (x < this->width && y < this->height){
-            // ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
-            return get(index(x,y));
-        }
-        return NULL;
-	}
-    
-    void set(int idx, COLORREF color){
-        if(idx >= 0 && idx < real_width()*width){
-            if (this->Bpp >= 3){
-                this->pixels[idx+2] = GetRValue(color);
-                this->pixels[idx+1] = GetGValue(color);
-            }
-            this->pixels[idx] = GetBValue(color);
-        }
-    }
-    
-	void set(short x,short y, COLORREF color){
-		if (x >=0 && y >= 0 && x < this->width && y < this->height){
-			// ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
-			set(index(x,y), color);	
-		}
-	}
+    COLORREF get(int idx);
+	COLORREF get(short x,short y);
+    void set(int idx, COLORREF color);
+	void set(short x,short y, COLORREF color);
+	
+	Image* crop(int x, int y, int w, int h);
 	
 	~Image();
 };
@@ -127,9 +101,6 @@ void background(COLORREF bg = RGB(0,0,0));
 //Colen the HDC in dst into the HDC in src
 void Clone(HDC& src, HDC& dst);
 
-//Create all the handles for the animation
-void InitCanvas();
-
 //Generate rainbow color based on j
 COLORREF rainbowColors(int j);
 
@@ -146,6 +117,10 @@ Image* GetCanvas(int x2 = -1, int y2 = -1, int x = 0, int y =0);
 bool drawImage(Image* img, int x = 0, int y = 0);
 
 bool SaveBMP(Image* img, LPCTSTR bmpfile);
+
+void createCanvas();
+
+void createCanvas(int w, int h);
 
 void nextFrame();
 

@@ -1,6 +1,11 @@
 #include "Mask.cpp"
 #include <fstream>
 #include <vector>
+//#define CENTER
+#define BOTTOM_RIGHT
+#define MASK
+#define SUPERMAN
+//#define EARTH
 
 struct Info{
     int width,height,Bpp;
@@ -13,7 +18,9 @@ struct Info{
 };
 
 class Serializer{
-    Mask* m = NULL;
+	#ifdef MASK
+	Mask* m = NULL;
+	#endif
     void diff(ofstream& ofs, Image* base){
         int idx;
         for(short i=0;i<base->width;++i){
@@ -74,7 +81,9 @@ class Serializer{
             for(short j=0;j<ans->height;++j){
                 idx = ans->index(i,j);
                 ifs.read((char*)(ans->pixels+idx),ans->Bpp);
-                ans->set(idx, m->color_mask(ans->get(idx),idx));
+				#ifdef MASK
+				ans->set(idx, m->color_mask(ans->get(idx), idx));
+				#endif
             }
         }
         return ans;
@@ -93,7 +102,9 @@ class Serializer{
             ifs.read((char*)&len,sizeof(short));
             for(int j=0;j<len;j+=ans->Bpp){
                 ifs.read(ans->pixels+idx+j,ans->Bpp);
-                ans->set(idx+j, m->color_mask(ans->get(idx+j), idx+j));
+				#ifdef MASK
+				ans->set(idx + j, m->color_mask(ans->get(idx + j), idx + j));
+				#endif
             }
             i+= len;
         }
@@ -105,13 +116,26 @@ public:
         ifstream ifs;
         Image* prev = NULL;
         
-        ifs.open("temp.bin",ios::binary);
+        ifs.open("data.bin",ios::binary);
         ifs.read((char*)&inf,sizeof(Info));
     
         int x_off = width - inf.width;
         int y_off = height - inf.height;
-        Image* bg = GetCanvas(width,height,x_off, y_off);
-        m = new Mask(RGB(80,240,101), bg);
+		#ifdef BOTTOM_RIGHT
+		Image* bg = GetCanvas(width, height, x_off, y_off);
+		#endif
+		#ifdef CENTER
+		Image* bg = GetCanvas(width - x_off / 2, height - y_off / 2, x_off / 2, y_off / 2);
+		#endif
+		#ifdef MASK
+		#ifdef EARTH
+		m = new Mask(RGB(39, 253, 0), bg, 0.32);
+		#endif
+		#ifdef SUPERMAN
+		m = new Mask(RGB(80, 240, 101), bg, 0.42);
+		#endif
+		#endif
+
         int i = 0;
         do{
             prev = construct(ifs,inf,prev);
@@ -119,7 +143,9 @@ public:
         }while(!ifs.eof());
         ifs.close();
         delete bg;
+		#ifdef MASK
         delete m;
+		#endif
         return vec;
     }
     
@@ -128,7 +154,7 @@ public:
         Info inf((*it)->width,(*it)->height,(*it)->Bpp);
         
         ofstream ofs;
-        ofs.open("temp.bin",ios::binary);
+        ofs.open("data.bin",ios::binary);
         ofs.write((char*)&inf,sizeof(Info));
         
         Image* base = NULL;

@@ -7,6 +7,7 @@ using namespace std;
 int x = 0, y = 0, spacing = 15;
 
 void setup(){
+	createCanvas();
 	background(RGB(200,200,200));
 	srand(time(NULL));
 }

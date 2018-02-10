@@ -7,19 +7,21 @@ class Mask{
 private:
     COLORREF mask;
     double threshold;
+	int max_offset;
     Image* bg;
 public:
-    Mask(COLORREF mask, Image* bg, double threshold = 0.45){
+    Mask(COLORREF mask, Image* bg, double threshold, int max_offset = 20){
         this->mask = mask;
         this->bg = bg;
         this->threshold = threshold;
+		this->max_offset = max_offset;
     }
     
     COLORREF color_mask(COLORREF c, int idx){
         double dist = color_dist(c,mask);
         return blend(c,
             bg->get(idx),
-            20*(dist-threshold));
+			max_offset*(dist-threshold));
     }
     
     static double color_dist(COLORREF color1,COLORREF color2){

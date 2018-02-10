@@ -8,6 +8,7 @@ static int lvl_x;
 static int col;
 
 void setup(){
+	createCanvas();
 	lvl_y = lvl_x = col = 0;
 	height /= 2;
 	width /= 2;

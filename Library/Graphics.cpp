@@ -27,7 +27,6 @@ bool first = false;//Did we statred a shape drawing
 bool loop = true;//Should the draw function be in loop
 long long frameCount = 1;//The number of frames from the bigining of the animation
 
-
 Image::Image(int width, int height, short Bpp){
     this->width = width;
     this->height = height;
@@ -44,17 +43,182 @@ int Image::index(short x, short y){
    return ((Bpp*width+3) & ~3)*(height-1-y)+x*Bpp;
 }
 
+COLORREF Image::get(int idx){
+	if(idx >= 0 && idx < real_width()*height){
+		if (this->Bpp >= 3)
+			return RGB(this->pixels[idx+2],this->pixels[idx+1],this->pixels[idx]);
+		return RGB(this->pixels[idx],this->pixels[idx],this->pixels[idx]);
+	}
+	return NULL;
+}
+
+COLORREF Image::get(short x,short y){
+	if (x < this->width && y < this->height){
+		// ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
+		return get(index(x,y));
+	}
+	return NULL;
+}
+
+void Image::set(int idx, COLORREF color){
+	if(idx >= 0 && idx < real_width()*height){
+		if (this->Bpp >= 3){
+			this->pixels[idx+2] = GetRValue(color);
+			this->pixels[idx+1] = GetGValue(color);
+		}
+		this->pixels[idx] = GetBValue(color);
+	}
+}
+
+void Image::set(short x,short y, COLORREF color){
+	if (x >=0 && y >= 0 && x < this->width && y < this->height){
+		// ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
+		set(index(x,y), color);	
+	}
+}
+
+Image* Image::crop(int x, int y, int w, int h){
+	Image* cropped = new Image(w,h,this->Bpp);
+	int x_bytes = x*this->Bpp,
+		w_bytes = cropped->real_width(),
+		// bitmap is stored in reversed y order
+		remaining = this->height - (y+h);
+	for(int i=0;i<h;i++){
+		memcpy(cropped->pixels+i*w_bytes,
+				this->pixels+real_width()*(remaining+i)+x_bytes,
+				w_bytes);
+	}
+	return cropped;
+}
+
 Image::~Image(){
     if (this->pixels)
         delete[] this->pixels;
 }
+
+Image* loadImage(const char *name){
+	Image* img = NULL;
+	HDC hCompDC = CreateCompatibleDC(bufDC);
+	if (NULL != hCompDC){
+		HBITMAP hBMP = (HBITMAP)LoadImageA( NULL, name , IMAGE_BITMAP, 0, 0,
+				   LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
+		if (NULL != hBMP){
+			if (NULL != SelectObject(hCompDC, hBMP)){
+				BITMAPINFO info = {0};
+				info.bmiHeader.biSize = sizeof(info.bmiHeader);
+				if(NULL != GetDIBits(hCompDC, hBMP, 0, 0, NULL, &info, DIB_RGB_COLORS)){
+					info.bmiHeader.biHeight = abs(info.bmiHeader.biHeight);
+					img = new Image(info.bmiHeader.biWidth,
+                        info.bmiHeader.biHeight,
+                        info.bmiHeader.biBitCount/8);
+					GetDIBits(hCompDC, hBMP, 0, info.bmiHeader.biHeight, img->pixels, &info, DIB_RGB_COLORS);
+				}
+			}
+			DeleteObject(hBMP);
+		}
+        DeleteDC(hCompDC);
+	}
+	return img;
+}
+
+Image* GetCanvas(int x2, int y2, int x, int y){
+	Image* img = NULL;
+	if (x2 == -1)
+		x2 = width;
+	if (y2 == -1)
+		y2 = height;
+	x2 -= x;
+	y2 -= y;
+	HDC hCompDC = CreateCompatibleDC(bufDC);
+	if (NULL != hCompDC){
+		HBITMAP hBmp = CreateCompatibleBitmap(bufDC, x2, y2);
+		if (NULL != hBmp){
+			if (NULL != SelectObject(hCompDC, hBmp)){
+				if (NULL != BitBlt(hCompDC, 0, 0, x2, y2, bufDC, x, y, SRCCOPY)){
+					img = new Image(x2, y2,3);
+					BITMAPINFO info = {0};
+					info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+					info.bmiHeader.biWidth = x2;
+					info.bmiHeader.biHeight = y2;
+					info.bmiHeader.biPlanes = 1;	
+					info.bmiHeader.biBitCount = 24;
+					info.bmiHeader.biCompression = BI_RGB; 
+					GetDIBits(hCompDC, hBmp, 0, y2, img->pixels, &info, DIB_RGB_COLORS);
+				}
+			}
+			DeleteObject(hBmp);
+		}
+		DeleteDC(hCompDC);
+	}
+	return img;
+}
+
+bool drawImage(Image* img, int x, int y){
+    // if(img->hDc){
+        // return (NULL != BitBlt(bufDC, x, y, img->width, img->height, *(img->hDc), 0, 0, SRCCOPY));
+    // }
+    bool success = false;
+	HDC hCompDC = CreateCompatibleDC(bufDC);
+	if (NULL != hCompDC){
+		HBITMAP hBmp = CreateCompatibleBitmap(bufDC, img->width, img->height);
+		if (NULL != hBmp){
+			BITMAPINFO info = {0};
+			info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+			info.bmiHeader.biWidth = img->width;
+			info.bmiHeader.biHeight = img->height;
+			info.bmiHeader.biPlanes = 1;	
+			info.bmiHeader.biBitCount = 8*(img->Bpp);
+			info.bmiHeader.biCompression = BI_RGB; 
+			if (NULL != SetDIBits(hCompDC, hBmp, 0, img->height, img->pixels, &info, DIB_PAL_COLORS)){//DIB_RGB_COLORS)){
+				if (NULL != SelectObject(hCompDC, hBmp)){
+                    // img->hDc = new HDC();
+                    // *(img->hDc) = hCompDC;
+					if (NULL != BitBlt(bufDC, x, y, img->width, img->height, hCompDC, 0, 0, SRCCOPY)){
+						success = true;
+					}
+				}
+			}
+			DeleteObject(hBmp);
+		}
+		DeleteDC(hCompDC);
+	}
+	return success;
+}
+
+bool SaveBMP(Image* img, const char* bmpfile){
+	bool success = false;
+	BITMAPFILEHEADER bmfh = {};
+	BITMAPINFOHEADER info = {};
+	bmfh.bfType = 0x4d42;// 0x4d42 = 'BM'
+	bmfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	info.biSize = sizeof(BITMAPINFOHEADER);
+	info.biWidth = img->width;
+	info.biHeight = img->height;
+	info.biPlanes = 1;
+	info.biBitCount = 8*(img->Bpp);
+	info.biCompression = BI_RGB; 
+	HANDLE file = CreateFileA(bmpfile, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(NULL != file){
+		unsigned long bwritten;
+		if(TRUE == WriteFile(file, &bmfh, sizeof(BITMAPFILEHEADER), &bwritten, NULL)){	
+			if(TRUE == WriteFile(file, &info, sizeof ( BITMAPINFOHEADER ), &bwritten, NULL)){	
+				if (TRUE == WriteFile(file, img->pixels, img->real_width()*img->height, &bwritten, NULL )){	
+					success = true;
+				}
+			}
+		}
+		CloseHandle(file);	
+	}
+	return success;
+}
+
 //get pixel color from canvas/screen
 COLORREF GetPixelC(int x,int y){
 	return GetPixel(bufDC,x,y);
 }
 
 //set pixel color at given point on the canvas/screen
-void SetPixelC(float x,float y){
+void SetPixelC(float x, float y){
 	COLORREF color = do_fill ? fill_color : stroke_color;
 	if (alpha_val != 255){
 		COLORREF C = GetPixelC(x,y);
@@ -162,7 +326,7 @@ void _drawEllipse(int x0, int y0, int rx, int ry){
     doEllipse(x0, y0, x, y);
 
     //Region 1
-    p = rySq - (rxSq * ry) + (0.25 * rxSq);
+    p = (float)(rySq - (rxSq * ry) + (0.25 * rxSq));
     while (px < py)
     {
         x++;
@@ -179,7 +343,7 @@ void _drawEllipse(int x0, int y0, int rx, int ry){
     }
 
     //Region 2
-    p = rySq*(x+0.5)*(x+0.5) + rxSq*(y-1)*(y-1) - rxSq*rySq;
+    p = (float)(rySq*(x+0.5)*(x+0.5) + rxSq*(y-1)*(y-1) - rxSq*rySq);
     while (y > 0)
     {
         y--;
@@ -255,7 +419,8 @@ Point drawText(int x0, int y0,const char* txt, int len){
 //Set the text size in pixels for text drawings 
 void textSize(int size){
 	// HFONT hFont = (HFONT)GetCurrentObject(bufDC,OBJ_FONT);
-	HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+	// HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+	HFONT hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT);
 	LOGFONT logfont;
 	GetObject(hFont, sizeof(LOGFONT), &logfont);
 	
@@ -281,32 +446,6 @@ void vertex(Point p){
 	previous = p;
 }
 
-void alpha(BYTE alpha){
-	alpha_val = alpha;
-}
-
-//Set the background of each frame
-void background(COLORREF bg){
-	HDC tmpDC = NULL;
-	Clone(bufDC, tmpDC);
-	#ifdef DESKTOP_BG
-	BitBlt(tmpDC, 0, 0, width, height, backupDC, 0, 0, SRCCOPY);
-	#endif
-	#ifndef DESKTOP_BG
-	HBRUSH hBrush = CreateSolidBrush(bg);
-	RECT rect = {0,0,width,height};
-	FillRect(tmpDC,&rect,hBrush);
-	DeleteObject(hBrush);
-	#endif
-	if (alpha_val == 255){
-		BitBlt(bufDC,0,0,width,height,tmpDC,0, 0,SRCCOPY);
-	}else{
-		BLENDFUNCTION blend = {AC_SRC_OVER, 0, alpha_val, 0};
-		AlphaBlend(bufDC, 0, 0, width, height, tmpDC, 0, 0 , width, height, blend);
-	}
-	DeleteDC(tmpDC);
-}
-
 #ifdef DESKTOP_BG
 //Funtion to find child of the hwnd (find the desktop handle)
 BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam){
@@ -315,8 +454,9 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam){
     {
         // Gets the WorkerW Window after the current one.
         myconsole = FindWindowEx(NULL, hwnd, "WorkerW", NULL);
+        DeleteObject(p);
+        return FALSE;
     }
-	DeleteObject(p);
 	return TRUE;
 }
 
@@ -342,6 +482,42 @@ void findDesktopBackGround(){
 }
 #endif
 
+//Set the background of each frame
+void background(COLORREF bg){
+	HDC tmpDC = NULL;
+	Clone(bufDC, tmpDC);
+	#ifdef DESKTOP_BG
+	BitBlt(tmpDC, 0, 0, width, height, backupDC, 0, 0, SRCCOPY);
+	#endif
+	#ifndef DESKTOP_BG
+	HBRUSH hBrush = CreateSolidBrush(bg);
+	RECT rect = {0,0,width,height};
+	FillRect(tmpDC,&rect,hBrush);
+	DeleteObject(hBrush);
+	#endif
+	if (alpha_val == 255){
+		BitBlt(bufDC,0,0,width,height,tmpDC,0, 0,SRCCOPY);
+	}else{
+		BLENDFUNCTION blend = {AC_SRC_OVER, 0, alpha_val, 0};
+		AlphaBlend(bufDC, 0, 0, width, height, tmpDC, 0, 0 , width, height, blend);
+	}
+	DeleteDC(tmpDC);
+}
+
+void alpha(BYTE alpha){
+	alpha_val = alpha;
+}
+
+//Generate rainbow color based on j
+COLORREF rainbowColors(int j){
+	float frequency = 0.3f;
+	int red,green,blue;
+	red   = (int)(sin(frequency*j + 0) * 127 + 128);
+	green = (int)(sin(frequency*j + 2) * 127 + 128);
+	blue  = (int)(sin(frequency*j + 4) * 127 + 128);
+	return RGB(red,green,blue);
+}
+
 //Colen the HDC in dst into the HDC in src
 void Clone(HDC& src, HDC& dst){
 	dst = CreateCompatibleDC(src);
@@ -350,8 +526,21 @@ void Clone(HDC& src, HDC& dst){
 	DeleteObject(hbmMem);
 }
 
+void hideCursor()
+{
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_CURSOR_INFO CursoInfo;
+	CursoInfo.dwSize = 1;         /* The size of caret */
+	CursoInfo.bVisible = false;   /* Caret is visible? */
+	SetConsoleCursorInfo(hConsole, &CursoInfo);
+}
+
+void hideScrollBar(){
+	ShowScrollBar(myconsole, SB_BOTH, FALSE);
+}
+
 //Create all the handles for the animation
-void InitCanvas(){
+void InitCanvas(bool fullscreen){
 	#ifdef DESKTOP_BG
 	findDesktopBackGround(); 
 	#else
@@ -359,11 +548,15 @@ void InitCanvas(){
 	#endif
     if (myconsole != NULL)
 	{
+		hideCursor();
+		hideScrollBar();
 		mydc = GetDC(myconsole);
 		if (mydc != NULL)
 		{
-			width = GetDeviceCaps(mydc,HORZRES);
-			height = GetDeviceCaps(mydc,VERTRES);
+			if(fullscreen){
+				width = GetDeviceCaps(mydc,HORZRES);
+				height = GetDeviceCaps(mydc,VERTRES);
+			}
 			Clone(mydc, bufDC);
 			BitBlt(bufDC, 0, 0, width, height, mydc, 0, 0, SRCCOPY);
 			#ifdef DESKTOP_BG
@@ -380,136 +573,19 @@ void InitCanvas(){
 	}
 }
 
-//Generate rainbow color based on j
-COLORREF rainbowColors(int j){
-	float frequency = 0.3;
-	int red,green,blue;
-	red   = sin(frequency*j + 0) * 127 + 128;
-	green = sin(frequency*j + 2) * 127 + 128;
-	blue  = sin(frequency*j + 4) * 127 + 128;
-	return RGB(red,green,blue);
+void createCanvas(){
+	InitCanvas(true);
 }
 
-//Stop the draw loop
-void noLoop(){
-	loop = false;
+void createCanvas(int w, int h){
+	width = w;
+	height = h;
+	InitCanvas(false);
 }
 
 //Draw the current frame of animation
 void doDraw(){
 	BitBlt(mydc,0,0,width,height,bufDC,0, 0,SRCCOPY);
-}
-
-Image* loadImage(const char *name){
-	Image* img = NULL;
-	HDC hCompDC = CreateCompatibleDC(bufDC);
-	if (NULL != hCompDC){
-		HBITMAP hBMP = (HBITMAP)LoadImageA( NULL, name , IMAGE_BITMAP, 0, 0,
-				   LR_CREATEDIBSECTION | LR_DEFAULTSIZE | LR_LOADFROMFILE );
-		if (NULL != hBMP){
-			if (NULL != SelectObject(hCompDC, hBMP)){
-				BITMAPINFO info = {0};
-				info.bmiHeader.biSize = sizeof(info.bmiHeader);
-				if(NULL != GetDIBits(hCompDC, hBMP, 0, 0, NULL, &info, DIB_RGB_COLORS)){
-					info.bmiHeader.biHeight = abs(info.bmiHeader.biHeight);
-					img = new Image(info.bmiHeader.biWidth,
-                        info.bmiHeader.biHeight,
-                        info.bmiHeader.biBitCount/8);
-					GetDIBits(hCompDC, hBMP, 0, info.bmiHeader.biHeight, img->pixels, &info, DIB_RGB_COLORS);
-				}
-			}
-			DeleteObject(hBMP);
-		}
-        DeleteDC(hCompDC);
-	}
-	return img;
-}
-
-Image* GetCanvas(int x2, int y2, int x, int y){
-	Image* img = NULL;
-	if (x2 == -1)
-		x2 = width;
-	if (y2 == -1)
-		y2 = height;
-	x2 -= x;
-	y2 -= y;
-	HDC hCompDC = CreateCompatibleDC(bufDC);
-	if (NULL != hCompDC){
-		HBITMAP hBmp = CreateCompatibleBitmap(bufDC, x2, y2);
-		if (NULL != hBmp){
-			if (NULL != SelectObject(hCompDC, hBmp)){
-				if (NULL != BitBlt(hCompDC, 0, 0, x2, y2, bufDC, x, y, SRCCOPY)){
-					img = new Image(x2, y2,3);
-					BITMAPINFO info = {0};
-					info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-					info.bmiHeader.biWidth = x2;
-					info.bmiHeader.biHeight = y2;
-					info.bmiHeader.biPlanes = 1;	
-					info.bmiHeader.biBitCount = 24;
-					info.bmiHeader.biCompression = BI_RGB; 
-					GetDIBits(hCompDC, hBmp, 0, y2, img->pixels, &info, DIB_RGB_COLORS);
-				}
-			}
-			DeleteObject(hBmp);
-		}
-		DeleteDC(hCompDC);
-	}
-	return img;
-}
-
-bool drawImage(Image* img, int x, int y){
-    bool success = false;
-	HDC hCompDC = CreateCompatibleDC(bufDC);
-	if (NULL != hCompDC){
-		HBITMAP hBmp = CreateCompatibleBitmap(bufDC, img->width, img->height);
-		if (NULL != hBmp){
-			BITMAPINFO info = {0};
-			info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-			info.bmiHeader.biWidth = img->width;
-			info.bmiHeader.biHeight = img->height;
-			info.bmiHeader.biPlanes = 1;	
-			info.bmiHeader.biBitCount = 8*(img->Bpp);
-			info.bmiHeader.biCompression = BI_RGB; 
-			if (NULL != SetDIBits(hCompDC, hBmp, 0, img->height, img->pixels, &info, DIB_PAL_COLORS)){//DIB_RGB_COLORS)){
-				if (NULL != SelectObject(hCompDC, hBmp)){
-					if (NULL != BitBlt(bufDC, x, y, img->width, img->height, hCompDC, 0, 0, SRCCOPY)){
-						success = true;
-					}
-				}
-			}
-			DeleteObject(hBmp);
-		}
-		DeleteDC(hCompDC);
-	}
-	return success;
-}
-
-bool SaveBMP(Image* img, const char* bmpfile){
-	bool success = false;
-	long BufferSize = (img->width*img->height)*img->Bpp;
-	BITMAPFILEHEADER bmfh = {};
-	BITMAPINFOHEADER info = {};
-	bmfh.bfType = 0x4d42;// 0x4d42 = 'BM'
-	bmfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-	info.biSize = sizeof(BITMAPINFOHEADER);
-	info.biWidth = img->width;
-	info.biHeight = img->height;
-	info.biPlanes = 1;
-	info.biBitCount = 8*(img->Bpp);
-	info.biCompression = BI_RGB; 
-	HANDLE file = CreateFileA(bmpfile, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if(NULL != file){
-		unsigned long bwritten;
-		if(TRUE == WriteFile(file, &bmfh, sizeof(BITMAPFILEHEADER), &bwritten, NULL)){	
-			if(TRUE == WriteFile(file, &info, sizeof ( BITMAPINFOHEADER ), &bwritten, NULL)){	
-				if (TRUE == WriteFile(file, img->pixels, BufferSize, &bwritten, NULL )){	
-					success = true;
-				}
-			}
-		}
-		CloseHandle(file);	
-	}
-	return success;
 }
 
 void nextFrame(){
@@ -518,6 +594,11 @@ void nextFrame(){
 
 bool getLoop(){
 	return loop;
+}
+
+//Stop the draw loop
+void noLoop(){
+	loop = false;
 }
 
 void Finish(){
@@ -535,7 +616,6 @@ bool isFocused(){
 
 //Run the drawing in loop until noLoop() is called
 int main() {
-	InitCanvas();
 	setup();
 	do{
 		draw();

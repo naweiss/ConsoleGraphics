@@ -6,6 +6,7 @@ static const int VALS_SIZE = 5;
 static int vals[VALS_SIZE];
 
 void setup(){
+	createCanvas();
 	for (int i = 0; i < VALS_SIZE; i++){
 		vals[i] = i;
 	}

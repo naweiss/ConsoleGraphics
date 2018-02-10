@@ -73,6 +73,7 @@ int factorial(int n){
 }
 
 void setup(){
+	createCanvas();
 	srand (time(NULL));
 	for (int i = 0; i < POINT_SIZE; i++){
 		cities[i].x = Random(20,width/3+20);

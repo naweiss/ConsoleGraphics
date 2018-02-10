@@ -1,6 +1,8 @@
 #include "Graphics.h"
 
-void setup(){}
+void setup(){
+	createCanvas();
+}
 
 void draw(){
 	short rect_size = 30, grid_size = 15 ,border = 20;

@@ -84,6 +84,7 @@ void initGraph(){
 }
 
 void setup(){
+	createCanvas();
 	srand(time(NULL));
 	sleep_time = 0;
 	if (!dirExists("Logs")){

@@ -61,8 +61,7 @@ void setup(){
 		noLoop();
 		return;
 	}
-	width = img->width;
-	height = img-> height;
+	createCanvas(img->width,img-> height);
 }
 
 void draw(){

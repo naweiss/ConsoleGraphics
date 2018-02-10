@@ -93,6 +93,7 @@ public:
 static Stream** streams;
 
 void setup(){
+	createCanvas();
 	srand (time(NULL));
 	streams = new Stream*[width/symbolSize];
 	int x =0;

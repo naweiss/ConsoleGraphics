@@ -48,7 +48,7 @@ public:
 	}
 };
 
-int symbolSize = 15;
+int symbolSize = 20;
 
 class Stream{
 private:
@@ -90,10 +90,10 @@ public:
 static Stream** streams;
 
 void setup(){
+	createCanvas();
 	srand (time(NULL));
 	textSize(symbolSize);
 	alpha(100);
-	
 	streams = new Stream*[width/symbolSize];
 	int x =0;
 	for (int i=0;i <= width/symbolSize; i++)

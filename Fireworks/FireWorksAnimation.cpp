@@ -77,6 +77,7 @@ vector<Firework*> fireworks;
 clock_t timer;
 
 void setup(){
+	createCanvas();
 	srand(time(NULL));
 	stroke(RGB(0,0,0));
 	timer = clock();

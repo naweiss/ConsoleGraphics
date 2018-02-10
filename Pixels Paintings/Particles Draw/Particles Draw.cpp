@@ -8,9 +8,7 @@ static long length;
 void setup(){
 	srand(time(NULL));
 	frog = loadImage("frog.bmp");
-	width = frog->width;
-	height = frog->height;
-
+	createCanvas(frog->width,frog->height);
 	noStroke();
 	
 	length = 70;

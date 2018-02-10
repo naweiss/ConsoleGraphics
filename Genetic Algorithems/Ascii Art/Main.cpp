@@ -18,6 +18,7 @@ bool dirExists(const char* dirName_in){
 }								 
 
 void setup(){
+	createCanvas();
 	srand (time(NULL));
 	fill(RGB(0,0,0));	
 	textSize(SYMBOL_SIZE);

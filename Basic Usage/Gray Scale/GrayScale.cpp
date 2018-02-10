@@ -16,10 +16,11 @@ Image* img;
 
 void setup(){
 	img = loadImage("img2.bmp");
+	createCanvas(img->width, img->height);
 	image_gray_scale(img);
 }
 
 void draw(){
 	drawImage(img);
-	noLoop();
+	// noLoop();
 }

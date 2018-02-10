@@ -1,3 +1,8 @@
 *.exe
 *.obj
 OBJECT
+/WallPaper/Examples/**
+/Rockets/Imgs/**
+/Rockets/Logs/**
+/Ascii\ Art/Asciis/**
+/Ascii\ Art/Imgs/**

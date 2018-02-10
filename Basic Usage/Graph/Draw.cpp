@@ -6,8 +6,9 @@ Graph* g;
 int n = 10;
 
 void setup(){
+	createCanvas();
 	srand(time(NULL));
-	g = new Graph(n,500,250,50,50);
+	g = new Graph(n,500,250,50,20);
 	g->setMode(Graph::LINES);
 	// g->setMode(Graph::DOTS);
 	g->setGensLimit(60);

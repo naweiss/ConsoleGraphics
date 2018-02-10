@@ -18,7 +18,7 @@ DNA::DNA(){
 	for (int i = 0; i < ROWS; i++){
 		int sum = 0;
 		while(sum < WIDTH){
-			char tmp = DNA::pool.rand();
+			char tmp = pool.rand();
 			this->matrix[i].push_back(tmp);
 			sum += (int)(getTextSize(&tmp,1).x);
 		}
@@ -63,11 +63,13 @@ void DNA::mutation(){
 
 void DNA::calaFitness(){
 	Image* canvas = getImg();
-	double sum = 0;
+	double sum = 0, tmp;
 	for (int i=0;i<img->width;i++){
+		tmp = 0;
 		for (int j=0;j<img->height;j++){
-			sum += color_dist(canvas->get(i,j),img->get(i,j));
+			tmp += (img->height-j)*color_dist(canvas->get(i,j),img->get(i,j));
 		}
+		sum += tmp/(pow(img->height+0.5,2)-0.25);
 	}
 	delete canvas;
 	this->fitness = sum / (img->width*img->height);

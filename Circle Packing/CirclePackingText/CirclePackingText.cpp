@@ -45,8 +45,7 @@ void setup(){
 		noLoop();
 		return;
 	}
-	width = img->width;
-	height = img-> height;
+	createCanvas(img->width,img-> height);
 	int count = 0;
 	for (int x=0;x<img->width;x+=2){
 		for (int y=0;y<img->height;y+=2){

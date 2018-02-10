@@ -4,8 +4,7 @@
 static Image* img = NULL;
 void setup(){
 	img = loadImage("frog.bmp");
-	width = img->width;
-	height = img->height;
+	createCanvas(img->width,img->height);
 	noStroke();
 }
 

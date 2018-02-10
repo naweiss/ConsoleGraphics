@@ -76,6 +76,7 @@ void drawInfo(short index){
 }
 
 void setup(){
+	createCanvas();
 	srand((unsigned int)time(NULL));
 	noStroke();
 	createDirs();
