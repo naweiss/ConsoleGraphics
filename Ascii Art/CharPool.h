@@ -1,39 +1,37 @@
+#include "Graphics.h"
 #define POOL_SIZE 95
-// #define POOL_SIZE 5
+#include <iostream>
+using namespace std;
 
-char Latter(int code){
-	return (char)code;
+Image* Latter(int code){
+	background(RGB(255,255,255));
+	char c = (char)code;
+	drawText(0,0,&c,1);
+	Point size = getTextSize(&c,1);
+	return GetCanvas(size.x,size.y);
 }
 
 class CharPool{
-	char pool[POOL_SIZE];
+	Image* pool[POOL_SIZE];
 	int pool_index;
 public:
 	CharPool(){
-		restart();
-		#if POOL_SIZE == 95
-			int count = 0;
-			for (int i = 32; i < 127; i++){
-				pool[count++] = Latter(i);
-			}
-		#else
-			pool[0] = Latter(32);
-			pool[1] = Latter(45);
-			pool[2] = Latter(95);
-			pool[3] = Latter(124);
-			pool[4] = Latter(46);
-		#endif
+		pool_index = 0;
+		for (int i = 32, count = 0; i < 127; i++){
+			pool[count++] = Latter(i);
+		}
 	}
 	
-	void restart(){
-		pool_index = 0;
+	~CharPool(){
+		for (int i = 0; i < POOL_SIZE; i++)
+			delete pool[i];
 	}
 	
 	bool isDone(){
 		return pool_index == POOL_SIZE;
 	}
 	
-	char next(){
+	Image* next(){
 		return pool[pool_index++];
 	}
 };
