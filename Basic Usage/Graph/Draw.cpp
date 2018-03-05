@@ -6,19 +6,23 @@ Graph* g;
 int n = 10;
 
 void setup(){
-	createCanvas();
+	lineThickness(2);
 	srand(time(NULL));
-	g = new Graph(n,500,250,50,20);
+	createCanvas();
+	g = new Graph(n,700,400,50,20);
 	g->setMode(Graph::LINES);
 	// g->setMode(Graph::DOTS);
-	g->setGensLimit(60);
+	g->setGensLimit(100);
 }
 
 void draw(){
 	background();
 	vector<Point> vec;
-	for (int i = 0; i < n; i++)
-			vec.push_back(Point(frameCount/10.0,sin(frameCount/10.0+i*HALF_PI/5)*100));
+	float x = frameCount*1.0/n;
+	for (int i = 0; i < n; i++){
+		/** f(x,i) = 100*sin(x+i*PI/n) **/
+		vec.push_back(Point(x,sin(x+i*PI/n)*100));
+	}
 	g->addGen(vec);
 	g->show();
 	Sleep(200);

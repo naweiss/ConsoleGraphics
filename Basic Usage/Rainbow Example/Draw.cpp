@@ -11,7 +11,10 @@ void draw(){
 		for (int j = 0;j < grid_size; j++)
 		{
 			fill(rainbowColors(i+j));
-			drawRectangle(border+i*rect_size,border+j*rect_size,rect_size,rect_size);
+			drawRectangle(border+i*rect_size,
+						  border+j*rect_size,
+						  rect_size,
+						  rect_size);
 		}
 	}
 	noLoop();

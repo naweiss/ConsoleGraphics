@@ -59,6 +59,8 @@ void noStroke();
 //Draw line form (x0,y0) to (x1,y1)
 void drawLine(int x0, int y0, int x1, int y1);
 
+void lineThickness(int t);
+
 //Draw rectangle with left-top corner in (x0,y0) and width=w and height=h
 void drawRectangle(int x, int y, int w, int h);
 
@@ -98,17 +100,11 @@ void alpha(BYTE alpha_val = 255);
 //Set the background of each frame
 void background(COLORREF bg = RGB(0,0,0));
 
-//Colen the HDC in dst into the HDC in src
-void Clone(HDC& src, HDC& dst);
-
 //Generate rainbow color based on j
 COLORREF rainbowColors(int j);
 
 //Stop the draw loop
 void noLoop();
-
-//Draw the current frame of animation
-void doDraw();
 
 Image* loadImage(const char *name);
 
@@ -121,12 +117,6 @@ bool SaveBMP(Image* img, LPCTSTR bmpfile);
 void createCanvas();
 
 void createCanvas(int w, int h);
-
-void nextFrame();
-
-bool getLoop();
-
-void Finish();
 
 bool isFocused();
 

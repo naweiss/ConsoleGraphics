@@ -1,113 +1,99 @@
-#include "Graphics.h"
+#include "Circle.h"
 #include "Maths.h"
 #include <vector>
 #include <ctime>
-using namespace std;
-
-class Circle{
-private:
-public:
-	float r;
-	float x;
-	float y;
-	bool growing;
-	Circle(float x, float y){
-		this->x = x;
-		this->y = y;
-		this->r = 1;
-		this->growing = true;
-	}
-	
-	void grow(){
-		if (growing)
-			this->r++;
-	}
-	
-	bool edges(){
-		return (x+r > width || y+r > height || x-r < 0 || y-r < 0);
-	}
-	
-	void show(){
-		drawCircle(this->x,this->y,this->r);
-	}
-};
 
 vector<Circle> circles;
 vector<Point> spots;
 Image* img = NULL;
 
-void setup(){
-	srand(time(NULL));
-	stroke(RGB(255,255,255));
-	noFill();
-	img = loadImage("2017.bmp");
-	if (img == NULL){
-		noLoop();
-		return;
+bool isInsideCircle(Point p){
+	for (vector<Circle>::iterator c=circles.begin();
+		 c != circles.end();
+		 ++c){
+		if (c->dist(p) <= c->radius)
+			return true;
 	}
-	createCanvas(img->width,img-> height);
+	return false;
+}
+
+bool newCircleCreated(){
+	unsigned int index = Random(spots.size());
+	Point p(spots[index].x,spots[index].y);
+	if(isInsideCircle(p)) return false;
+
+	circles.push_back(Circle(p.x,p.y));
+	return true;
+}
+
+void addNewCircles(){
+	int total = 40;
+	int count = 0;
+	int attempts = 0;
+	
+	while(count < total){
+		if (newCircleCreated()){
+			count++;
+		}
+		if (++attempts > total*10){
+			SaveBMP(GetCanvas(),"ans.bmp");
+			noLoop();
+			return;
+		}
+	}
+}
+
+void handleCollisions(vector<Circle>::iterator c){
+	for (vector<Circle>::iterator other=circles.begin();
+		 other != circles.end();
+		 ++other){
+		if (other == c)
+			continue;
+		if (c->dist(*other) - 1 <= c->radius + other->radius){
+			c->stopGrow();
+			break;
+		}
+	}
+}
+
+void findAvailableSpots(){
 	int count = 0;
 	for (int x=0;x<img->width;x+=2){
 		for (int y=0;y<img->height;y+=2){
 			COLORREF pixel = img->get(x,y);
-			if (GetRValue(pixel) > 0
-				|| GetGValue(pixel) > 0
-				|| GetBValue(pixel) > 0){
+			if (pixel > 0){
 				spots.push_back(Point(x,y));
 			}
 		}		
 	}
 }
 
-double dist(int x0, int y0, int x1, int y1){
-	return sqrt(pow(abs(x0-x1),2)+pow(abs(y0-y1),2));
-}
-
-bool newCircle(){
-	unsigned int index = Random(spots.size());
-	int x = spots[index].x;
-	int y = spots[index].y;
-	
-	for (vector<Circle>::iterator c=circles.begin(); c != circles.end(); ++c){
-		if (dist(c->x,c->y,x,y) <= c->r)
-			return false;
+void setup(){
+	srand(time(NULL));
+	stroke(RGB(255,255,255));
+	noFill();
+	img = loadImage("BW.bmp");
+	if (img == NULL){
+		noLoop();
+		return;
 	}
-	circles.push_back(Circle(x,y));
-	return true;
+	createCanvas(img->width,img-> height);
+	findAvailableSpots();
 }
 
 void draw(){
 	background();
 	for (vector<Circle>::iterator c=circles.begin(); c != circles.end(); ++c){
-		if (c->growing){
-			if (c->edges()){
-				c->growing = false;
+		if (c->isGrowing()){
+			if (c->hitEdges()){
+				c->stopGrow();
 			} else {
-				for (vector<Circle>::iterator other=circles.begin(); other != circles.end(); ++other){
-					if (other == c)
-						continue;
-					if (dist(c->x,c->y,other->x,other->y) <= c->r + other->r){
-						c->growing = false;
-						break;
-					}
-				}
+				handleCollisions(c);
 			}
 		}
 		c->show();
 		c->grow();
 	}
 	
-	int total = 40;
-	int count = 0;
-	int atempts = 0;
-	
-	while(count < total){
-		if (newCircle()){
-			count++;
-		}
-		atempts++;
-		if (atempts > total*10){
-			noLoop();
-		}
-	}
+	addNewCircles();
 }

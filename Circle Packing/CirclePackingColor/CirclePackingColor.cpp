@@ -1,56 +1,57 @@
-#include "Graphics.h"
+#include "Circle.h"
 #include "Maths.h"
 #include <vector>
 #include <ctime>
-using namespace std;
 
-class Circle{
-public:
-	float r;
-	float x;
-	float y;
-	COLORREF c;
-	bool growing;
-	Circle(float x, float y,COLORREF c){
-		this->x = x;
-		this->y = y;
-		this->c = c;
-		this->r = 1;
-		this->growing = true;
-	}
-	
-	void grow(){
-		if (growing)
-			this->r++;
-	}
-	
-	bool edges(){
-		return (x+r > width || y+r > height || x-r < 0 || y-r < 0);
-	}
-	
-	void show(){
-		fill(this->c);
-		drawCircle(this->x,this->y,this->r);
-	}
-};
+vector<Circle> circles;
+Image* img = NULL;
 
-static vector<Circle> circles;
-static Image* img = NULL;
-
-double dist(int x0, int y0, int x1, int y1){
-	return sqrt(pow(x0-x1,2)+pow(y0-y1,2));
+bool isInsideCircle(Point p){
+	for (vector<Circle>::iterator c=circles.begin();
+		 c != circles.end();
+		 ++c){
+		if (c->dist(p) <= c->radius)
+			return true;
+	}
+	return false;
 }
 
-bool newCircle(){
-	int x = Random(width);
-	int y = Random(height);
+bool newCircleCreated(){
+	Point p(Random(width),Random(height));
+	if(isInsideCircle(p)) return false;
 	
-	for (vector<Circle>::iterator c=circles.begin(); c != circles.end(); ++c){
-		if (dist(c->x,c->y,x,y) <= c->r)
-			return false;
-	}
-	circles.push_back(Circle(x,y,img->get(x,y)));
+	circles.push_back(Circle(p.x,p.y,img->get(p.x,p.y)));
 	return true;
+}
+
+void addNewCircles(){
+	int total = 40;
+	int count = 0;
+	int attempts = 0;
+	
+	while(count < total){
+		if (newCircleCreated()){
+			count++;
+		}
+		if (++attempts > total*10){
+			SaveBMP(GetCanvas(),"ans.bmp");
+			noLoop();
+			return;
+		}
+	}
+}
+
+void handleCollisions(vector<Circle>::iterator c){
+	for (vector<Circle>::iterator other=circles.begin();
+		 other != circles.end();
+		 ++other){
+		if (other == c)
+			continue;
+		if (c->dist(*other) - 1 <= c->radius + other->radius){
+			c->stopGrow();
+			break;
+		}
+	}
 }
 
 void setup(){
@@ -66,36 +67,18 @@ void setup(){
 
 void draw(){
 	background();
-	for (vector<Circle>::iterator c=circles.begin(); c != circles.end(); ++c){
-		if (c->growing){
-			if (c->edges()){
-				c->growing = false;
+	for (vector<Circle>::iterator c=circles.begin();
+		 c != circles.end();
+		 ++c){
+		if (c->isGrowing()){
+			if (c->hitEdges()){
+				c->stopGrow();
 			} else {
-				for (vector<Circle>::iterator other=circles.begin(); other != circles.end(); ++other){
-					if (other == c)
-						continue;
-					if (dist(c->x,c->y,other->x,other->y) - 1<= c->r + other->r){
-						c->growing = false;
-						break;
-					}
-				}
+				handleCollisions(c);
 			}
 		}
 		c->show();
 		c->grow();
 	}
-	
-	int total = 40;
-	int count = 0;
-	int atempts = 0;
-	
-	while(count < total){
-		if (newCircle()){
-			count++;
-		}
-		atempts++;
-		if (atempts > total*10){
-			noLoop();
-		}
-	}
+	addNewCircles();
 }

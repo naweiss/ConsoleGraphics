@@ -20,6 +20,7 @@ COLORREF stroke_color=RGB(0,0,0);//Color for the stroke of shape
 bool do_fill = true;//Should shape have fill
 bool do_stroke = true;//Should shape have stroke
 BYTE alpha_val = 255;//The alpha_val value of the drawn background
+int line_thickness = 1;
 
 int prevH = -1;
 Point previous;//Previous point in polygon/vertex
@@ -253,31 +254,62 @@ void noStroke(){
 	do_stroke = false;
 }
 
-//Draw line form (x0,y0) to (x1,y1)
-void drawLine(int x0, int y0, int x1, int y1){
-	int dx = x1 - x0, dy = y1 - y0, steps;
-	float xIncrement, yIncrement, x = x0, y = y0;
+void lineThickness(int t){
+	if (t >= 1)
+		line_thickness = t;
+}
+
+void _drawLineP(float x, float y, int dx, int dy, bool skip){
+	float xIncrement, yIncrement, steps;
 	
 	steps = max(abs(dx), abs(dy));
-	xIncrement = dx / (float) steps;
-	yIncrement = dy / (float) steps;
-	SetPixelC(x,y);
-
-	for(int k = 0; k < steps; k++){
+	xIncrement = dx / steps;
+	yIncrement = dy / steps;
+	int k = 0;
+	
+	if(skip)
+		k++;
+	
+	for(; k < line_thickness; k++){
+		SetPixelC(x,y);
 		x += xIncrement;
 		y += yIncrement;
-		SetPixelC(x,y);
 	}
+}
+
+void _drawLine(float x, float y, int dx, int dy){
+	float xIncrement, yIncrement, steps;
+	
+	steps = max(abs(dx), abs(dy));
+	xIncrement = dx / steps;
+	yIncrement = dy / steps;
+
+	for(int k = 0; k <= steps; k++){
+		_drawLineP(x,y,dy,-dx,false);
+		_drawLineP(x,y,-dy,dx,true);
+		x += xIncrement;
+		if(ROUND(y) != ROUND(y+yIncrement)){
+			_drawLineP(x,y,dy,-dx,false);
+			_drawLineP(x,y,-dy,dx,true);
+		}
+		y += yIncrement;
+	}
+}
+
+//Draw line form (x0,y0) to (x1,y1)
+void drawLine(int x0, int y0, int x1, int y1){
+	int dx = x1 - x0, dy = y1 - y0;
+	_drawLine(x0,y0,dx,dy);
+	// _drawLine(x0,y0,-dy,dx);
+	// _drawLine(x0,y0,dy,-dx);
 }
 
 //Draw rectangle with left-top corner in (x0,y0) and width=w and height=h
 void drawRectangle(int x, int y, int w, int h){
 	if (do_fill){
-		for(int i = x; i <= x+w; i ++){
-			for(int j = y; j <= y+h; j ++){
+		for(int i = x; i <= x+w; i++)
+			for(int j = y; j <= y+h; j++)
 				SetPixelC(i,j);
-			}
-		}
 	}
 	if (do_stroke){
 		bool tmp = do_fill;
@@ -294,9 +326,11 @@ void drawRectangle(int x, int y, int w, int h){
 void doEllipse(int xc, int yc, int x, int y){
 	if (do_fill){
 		if (prevH != yc+y){
-			drawLine(xc+x, yc+y, xc-x, yc+y);
+			for(int i = xc-x; i <= xc+x; i++)
+				SetPixelC(i,yc+y);
 			if (y != 0){
-				drawLine(xc+x, yc-y, xc-x, yc-y);
+				for(int i = xc-x; i <= xc+x; i++)
+					SetPixelC(i,yc-y);
 			}
 		}
 		prevH = yc+y;
@@ -406,8 +440,11 @@ Point drawText(int x0, int y0,const wchar_t* txt, int len){
 
 //Draw ascii text of length = len, in (x,y) 
 Point drawText(int x0, int y0,const char* txt, int len){
+	if (do_fill)
+		SetTextColor(bufDC,fill_color);
+	else
+		SetTextColor(bufDC,stroke_color);
 	COLORREF color = do_fill ? fill_color : stroke_color;
-	SetTextColor(bufDC,fill_color);
 	SetBkMode(bufDC,TRANSPARENT);
 	Point size = getTextSize(txt,len);
 	RECT rect = { x0, y0, x0+(int)size.x, y0+(int)size.y };
@@ -482,6 +519,14 @@ void findDesktopBackGround(){
 }
 #endif
 
+//Colen the HDC in dst into the HDC in src
+void Clone(HDC& src, HDC& dst){
+	dst = CreateCompatibleDC(src);
+	HBITMAP hbmMem = CreateCompatibleBitmap(src, width, height);
+	SelectObject(dst, hbmMem);
+	DeleteObject(hbmMem);
+}
+
 //Set the background of each frame
 void background(COLORREF bg){
 	HDC tmpDC = NULL;
@@ -516,14 +561,6 @@ COLORREF rainbowColors(int j){
 	green = (int)(sin(frequency*j + 2) * 127 + 128);
 	blue  = (int)(sin(frequency*j + 4) * 127 + 128);
 	return RGB(red,green,blue);
-}
-
-//Colen the HDC in dst into the HDC in src
-void Clone(HDC& src, HDC& dst){
-	dst = CreateCompatibleDC(src);
-	HBITMAP hbmMem = CreateCompatibleBitmap(src, width, height);
-	SelectObject(dst, hbmMem);
-	DeleteObject(hbmMem);
 }
 
 void hideCursor()

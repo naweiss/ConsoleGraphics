@@ -20,7 +20,10 @@ void draw(){
 		if (key != -1){
 			fill(rainbowColors(col/1000.0));
 			string str = to_string(key);
-			drawText(lvl_x*30,lvl_y*18,str.c_str(),str.length());
+			drawText(lvl_x*30,
+					 lvl_y*18,
+					 str.c_str(),
+					 str.length());
 			lvl_y++;
 		}
 		if ((lvl_y+1)*18 > height){

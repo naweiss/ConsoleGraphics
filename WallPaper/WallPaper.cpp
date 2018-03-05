@@ -20,9 +20,9 @@ double msPassed()
 }
 
 #ifdef CREATE_GIF
-bool hasEnding(wchar_t* filename, wchar_t* ending) {
-	int filename_len = wcslen(filename), len = wcslen(ending);
-	return (filename_len >= len && wcscmp(filename + filename_len - len, ending) == 0);
+bool hasEnding(char* filename, char* ending) {
+	int filename_len = strlen(filename), len = strlen(ending);
+	return (filename_len >= len && strcmp(filename + filename_len - len, ending) == 0);
 }
 
 void find() {
@@ -32,7 +32,7 @@ void find() {
 	{
 		do
 		{
-			if (hasEnding(ffd.cFileName, L".bmp")) {
+			if (hasEnding(ffd.cFileName, ".bmp")) {
 				imgs->push_back(loadImage(ffd.cFileName));
 				#ifdef ONE_PIC
 				return;
@@ -76,8 +76,8 @@ void setup(){
 		imgs = s.deserialize(inf);
 		x_off = width - inf.width;
 		y_off = height - inf.height;
-		it = imgs->begin();
 	#endif
+	it = imgs->begin();
     t0 = clock();
 }
 

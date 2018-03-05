@@ -1,3 +1,4 @@
+#include "Keyboard.h"
 #include <Windows.h>
 
 static const unsigned int NumberOfKeys = 256U;

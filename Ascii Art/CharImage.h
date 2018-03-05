@@ -7,12 +7,12 @@ class CharImage{
 	double** bestScore;
 	int w;
 	int h;
-	
+
 	static double color_dist(COLORREF color1,COLORREF color2){
-		double r = pow((GetRValue(color1)-GetRValue(color2))/255,2.0);
-		double g = pow((GetGValue(color1)-GetGValue(color2))/255,2.0);
-		double b = pow((GetBValue(color1)-GetBValue(color2))/255,2.0);
-		return (r + g + b)/3;
+		int r = GetRValue(color1)-GetRValue(color2);
+		int g = GetGValue(color1)-GetGValue(color2);
+		int b = GetBValue(color1)-GetBValue(color2);
+		return ((double)(r*r + g*g + b*b))/(3*255*255);
 	}
 public:
 	CharImage(Image* img){
