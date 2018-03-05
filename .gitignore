@@ -1,6 +1,7 @@
 *.exe
 *.obj
 OBJECT
+Logs
 /WallPaper/Examples/**
 /Rockets/Imgs/**
 /Rockets/Logs/**
