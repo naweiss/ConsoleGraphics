@@ -1,4 +1,5 @@
 @echo off
+REM Expected input: FULL_PATH\MAIN_CPP_FILE
 REM Split the path given to directory and main file
 set dir=%~dp1
 set main=%~nx1
@@ -22,4 +23,4 @@ call set out=%%main%:cpp=exe%%
 
 REM start the compiled exe
 REM Note:start has problem with "%out%" in the first argument
-start "" "%out%"
+start /MAX "" "%out%"

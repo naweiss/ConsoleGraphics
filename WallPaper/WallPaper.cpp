@@ -83,7 +83,7 @@ void setup(){
 
 void draw(){
 	#if defined(SERIALIZE) && defined(CREATE_GIF)
-		system("pause");
+		pause();
 		noLoop();
 	#else
 		if(it == imgs->end())

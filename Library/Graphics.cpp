@@ -2,8 +2,6 @@
 #include <iostream>
 #define ROUND(a) ((int) (a + 0.5)) //Round function
 
-using namespace std;
-
 int width = -1;//Width of the canvas/screen
 int height = -1;//Height of the canvas/screen
 
@@ -502,7 +500,7 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam){
 void findDesktopBackGround(){
 	HWND parentFolderView = ::FindWindowExW(0, 0, L"Progman", L"Program Manager");
 	if (parentFolderView == NULL){
-		cout << "Error: ProgMan window not found" << endl;
+		std::cout << "Error: ProgMan window not found" << std::endl;
 		return;
 	}
 	LRESULT success = SendMessageTimeout(
@@ -601,12 +599,12 @@ void InitCanvas(bool fullscreen){
 			BitBlt(backupDC, 0, 0, width, height, mydc, 0, 0, SRCCOPY);
 			#endif
 		} else{
-			cout << "Error: device context not found" << endl;
+			std::cout << "Error: device context not found" << std::endl;
 		}
 		
 	}
 	else{
-		cout << "Error: console window not found" << endl;
+		std::cout << "Error: console window not found" << std::endl;
 	}
 }
 
@@ -644,11 +642,16 @@ void Finish(){
 	#ifdef DESKTOP_BG
 	ReleaseDC(myconsole, backupDC);
 	#endif
-	cin.ignore();
+	// if cin is used, user should add this line at the end of it usage
+	std::cin.ignore();
 }
 
 bool isFocused(){
 	return (GetForegroundWindow() == myconsole);
+}
+
+void pause() {
+	system("pause");
 }
 
 //Run the drawing in loop until noLoop() is called

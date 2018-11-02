@@ -1,5 +1,10 @@
 #include <Windows.h>
 
+/** The axes are defined the following way:
+	x-axis: from left to right
+	y-axis: from top to bottom
+**/
+
 // #define DESKTOP_BG //Console window as desktop background
 
 extern int width;//Width of the canvas/screen
@@ -10,11 +15,13 @@ extern long long frameCount;//The number of frames from the bigining of the anim
 struct Point{
    float x;
    float y;
+   float z;
    COLORREF color;
    Point(){}
-   Point(float x,float y){
+   Point(float x, float y, float z = 0){
 	   this->x = x;
 	   this->y = y;
+	   this->z = z;
    }
 };
 
@@ -119,6 +126,8 @@ void createCanvas();
 void createCanvas(int w, int h);
 
 bool isFocused();
+
+void pause();
 
 //Prototype for the initialization of the program
 void setup();
