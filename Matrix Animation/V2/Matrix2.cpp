@@ -94,6 +94,7 @@ static Stream** streams;
 
 void setup(){
 	createCanvas();
+	fontName("Terminal");
 	srand (time(NULL));
 	streams = new Stream*[width/symbolSize];
 	int x =0;

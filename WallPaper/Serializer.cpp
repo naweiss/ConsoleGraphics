@@ -61,7 +61,7 @@ class Serializer{
                         flag = false;
                         ofs.write((char*)&buf_s,sizeof(int));
                         ofs.write((char*)&len,sizeof(short));
-                        ofs.write(next->pixels+buf_s,len);
+                        ofs.write((char*)(next->pixels+buf_s),len);
                         count+=len;
                     }
                 }
@@ -101,7 +101,7 @@ class Serializer{
             ifs.read((char*)&idx,sizeof(int));
             ifs.read((char*)&len,sizeof(short));
             for(int j=0;j<len;j+=ans->Bpp){
-                ifs.read(ans->pixels+idx+j,ans->Bpp);
+                ifs.read((char*)(ans->pixels+idx+j),ans->Bpp);
 				#ifdef MASK
 				ans->set(idx + j, m->color_mask(ans->get(idx + j), idx + j));
 				#endif

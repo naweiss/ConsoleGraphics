@@ -13,6 +13,7 @@ class CharImage{
 		int g = GetGValue(color1)-GetGValue(color2);
 		int b = GetBValue(color1)-GetBValue(color2);
 		return ((double)(r*r + g*g + b*b))/(3*255*255);
+		// return (r+g+b)/(3*255);
 	}
 public:
 	CharImage(Image* img){

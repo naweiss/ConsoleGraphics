@@ -3,11 +3,11 @@ REM Expected input: FULL_PATH\MAIN_CPP_FILE OR FULL_LIBRARY_PATH
 REM - Split the path given to directory and main file
 REM - Determine the library path
 set dir=%~dp1
-set main=%~nx1
+set main="%~nx1"
 set library=%~dp0%Library
 
 REM If main file given check it exists
-if not "%main%" == "" (
+if not %main% == "" (
 	if not exist %1 (
 		echo usage:
 		echo    compile.bat  ^<main_file_path^>
@@ -40,7 +40,7 @@ if "%dir%" == "%library%\" (
 	echo [*] Compiling library files... 
 	for /r "%dir%" %%F in (*.cpp) do (
 		echo | set /p prefix="[*] "
-		call cl /c /EHsc "%%F" /FoOBJECT\ 2> nul
+		call cl /c /nologo /EHsc /O2 /Oi "%%F" /FoOBJECT\ 2> nul
 	)
 	echo [+] Done
 	pause
@@ -51,7 +51,7 @@ echo [*] Compiling files...
 REM Create obj files
 for /r "%dir%" %%F in (*.cpp) do (
 	echo | set /p prefix="[*] "
-	call cl /c /EHsc "%%F" /FoOBJECT\ /I "%library%" 2> nul
+	call cl /c /nologo /EHsc /O2 /Oi "%%F" /FoOBJECT\ /I "%library%" 2> nul
 )
 echo [+] Done
 
@@ -67,9 +67,9 @@ echo [*] Linking...
 REM Choose name for exe file based on main file
 call set out=%%main%:cpp=exe%%
 REM Link all the obj file to an exe file
-link %list% user32.lib gdi32.lib msimg32.lib /OUT:%out% > nul
+link /NOLOGO %list% user32.lib gdi32.lib msimg32.lib /OUT:%out% 2> nul
 echo [+] Done
 
 pause
 REM Run the code
-start /MAX "" "%out%"
+start /MAX "" %out%

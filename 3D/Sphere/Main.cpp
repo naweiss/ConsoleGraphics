@@ -14,9 +14,8 @@ Point translate2d(const Point& p, float x, float y) {
 }
 
 Point projecte2d(const Point& p) {
-	// Regular
+	/* Without perspective */
 	return Point(p.x, p.y);
-	
 }
 
 Point rotate3dX(const Point& p, float angle) {

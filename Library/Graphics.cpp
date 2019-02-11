@@ -31,7 +31,7 @@ Image::Image(int width, int height, short Bpp){
     this->height = height;
     this->Bpp = Bpp;
     // ((Bpp*width+3) & ~3) is width with padding instead of just Bpp*width
-    this->pixels = new char[real_width()*height];
+    this->pixels = new unsigned char[real_width()*height];
 }
 
 int Image::real_width(){
@@ -451,17 +451,25 @@ Point drawText(int x0, int y0,const char* txt, int len){
 	return size;
 }
 
+
+//Set the font by name
+void fontName(char* name) {
+	HFONT oldFont = (HFONT)GetCurrentObject(bufDC,OBJ_FONT);
+	LOGFONT logfont;
+	GetObject(oldFont, sizeof(LOGFONT), &logfont);
+	
+	HFONT hFont = CreateFont(logfont.lfHeight, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, name);
+	SelectObject(bufDC, hFont);
+}
+
 //Set the text size in pixels for text drawings 
 void textSize(int size){
-	// HFONT hFont = (HFONT)GetCurrentObject(bufDC,OBJ_FONT);
-	// HFONT hFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
-	HFONT hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT);
+	HFONT hFont = (HFONT)GetCurrentObject(bufDC,OBJ_FONT);
 	LOGFONT logfont;
 	GetObject(hFont, sizeof(LOGFONT), &logfont);
 	
-	// Now change the logfont.lfHeight member
-	logfont.lfHeight = -size; // in pixles
-		
+	logfont.lfHeight = size;
+	
 	HFONT hNewFont = CreateFontIndirect(&logfont);
 	SelectObject(bufDC, hNewFont);
 }

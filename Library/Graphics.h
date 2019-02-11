@@ -29,7 +29,7 @@ struct Image{
 	int width;
 	int height;
 	short Bpp;
-	char* pixels;
+	unsigned char* pixels;
     // HDC* hDc = NULL;
 	
 	Image(int width, int height, short Bpp);
@@ -91,6 +91,9 @@ Point drawText(int x0, int y0,const wchar_t* txt, int len);
 
 //Draw ascii text of length = len, in (x,y) 
 Point drawText(int x0, int y0,const char* txt, int len);
+
+//Set the font by name
+void fontName(char* name);
 
 //Set the text size in pixels for text drawings 
 void textSize(int size);

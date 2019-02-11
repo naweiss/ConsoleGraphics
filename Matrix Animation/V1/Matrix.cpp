@@ -92,6 +92,7 @@ static Stream** streams;
 void setup(){
 	createCanvas();
 	srand (time(NULL));
+	fontName("Consolas");
 	textSize(symbolSize);
 	alpha(100);
 	streams = new Stream*[width/symbolSize];
