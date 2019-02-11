@@ -5,11 +5,14 @@
 	y-axis: from top to bottom
 **/
 
-// #define DESKTOP_BG //Console window as desktop background
+// #define DESKTOP_BG // Console window as desktop background
 
-extern int width;//Width of the canvas/screen
-extern int height;//Height of the canvas/screen
-extern long long frameCount;//The number of frames from the bigining of the animation
+extern int argc;// Number of command line arguments
+extern char** argv;// Number of command line arguments
+extern int width;// Width of the canvas/screen
+extern int width;// Width of the canvas/screen
+extern int height;// Height of the canvas/screen
+extern long long frameCount;// The number of frames from the bigining of the animation
 
 //Struct for point in 2d
 struct Point{

@@ -2,6 +2,8 @@
 #include <iostream>
 #define ROUND(a) ((int) (a + 0.5)) //Round function
 
+int argc;// Number of command line arguments
+char** argv;// Number of command line arguments
 int width = -1;//Width of the canvas/screen
 int height = -1;//Height of the canvas/screen
 
@@ -663,7 +665,10 @@ void pause() {
 }
 
 //Run the drawing in loop until noLoop() is called
-int main() {
+int main(int _argc, char** _argv) {
+	argc = _argc;
+	argv = _argv;
+
 	setup();
 	do{
 		draw();
